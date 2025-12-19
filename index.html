@@ -117,7 +117,40 @@
             justify-content: center;
             z-index: 100;
         }
+/* Style for all buttons in the overlay (Start, Reset, etc.) */
+#overlay button {
+    background-color: var(--primary);
+    color: white;
+    border: 2px solid var(--accent);
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    margin: 10px;
+}
 
+#overlay button:hover {
+    background-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent);
+}
+
+#reset-btn {
+    border: none !important;
+    background: transparent !important;
+    color: #666 !important;
+    font-size: 0.8rem !important;
+    text-decoration: underline;
+    margin-top: 20px !important;
+}
+
+#reset-btn:hover {
+    color: #e74c3c !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
         .hidden { display: none !important; }
 
         @media (max-width: 600px) {
