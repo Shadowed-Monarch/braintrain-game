@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrainSpeed Trainer - All Math Types</title>
+    <title>BrainSpeed Trainer - Fixed Levels</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -81,7 +81,6 @@
             font-size: 1.5rem;
             font-weight: bold;
             box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
-            white-space: nowrap;
         }
 
         #input-area { margin-top: 20px; display: none; }
@@ -123,7 +122,6 @@
             justify-content: center;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1.3rem;
         }
     </style>
 </head>
@@ -164,11 +162,10 @@ class GameManager {
         this.currentGameType = null;
         this.isPlaying = false;
         this.questionsAnsweredInLevel = 0;
-        this.usedQuestions = new Set();
         this.activeEntities = []; 
         this.spawnInterval = null;
         this.gameLoopId = null;
-        this.mathTypeCounter = 0; // To force different math types
+        this.mathTypeCounter = 0;
 
         this.container = document.getElementById('game-container');
         this.input = document.getElementById('player-input');
@@ -176,8 +173,13 @@ class GameManager {
         this.startBtn = document.getElementById('start-btn');
     }
 
-    saveProgress() { localStorage.setItem(`brain_level_${this.currentGameType}`, this.level); }
-    loadProgress(type) { return parseInt(localStorage.getItem(`brain_level_${type}`)) || 1; }
+    saveProgress() { 
+        localStorage.setItem(`brain_level_${this.currentGameType}`, this.level); 
+    }
+    
+    loadProgress(type) { 
+        return parseInt(localStorage.getItem(`brain_level_${type}`)) || 1; 
+    }
 
     resetCurrentGameProgress() {
         if(confirm("Reset to Level 1?")) {
@@ -187,21 +189,21 @@ class GameManager {
         }
     }
 
+    updateHUD() {
+        document.getElementById('level-display').innerText = this.level;
+        document.getElementById('lives-display').innerText = this.lives;
+    }
+
     switchGame(type) {
         this.currentGameType = type;
         this.level = this.loadProgress(type);
         this.lives = 5;
-        this.updateHUD();
+        this.updateHUD(); // Show correct level when switching
         this.overlay.classList.remove('hidden');
         this.startBtn.classList.remove('hidden');
         document.getElementById('reset-btn').classList.remove('hidden');
         document.getElementById('overlay-title').innerText = `${type.toUpperCase()} - Level ${this.level}`;
         document.getElementById('input-area').style.display = (type === 'dots') ? 'none' : 'block';
-    }
-
-updateHUD() {
-        document.getElementById('level-display').innerText = this.level;
-        document.getElementById('lives-display').innerText = this.lives;
     }
 
     startGame() {
@@ -211,7 +213,6 @@ updateHUD() {
         this.input.focus();
         this.activeEntities = [];
         this.questionsAnsweredInLevel = 0;
-        this.usedQuestions.clear();
         this.container.innerHTML = '<div id="overlay" class="hidden"></div>'; 
         this.container.appendChild(this.overlay);
 
@@ -219,22 +220,21 @@ updateHUD() {
         else this.startScrollingGame();
     }
 
-stopGame(reason) {
+    stopGame(reason) {
         this.isPlaying = false;
         clearInterval(this.spawnInterval);
         cancelAnimationFrame(this.gameLoopId);
-        
         this.overlay.classList.remove('hidden');
         
         if(reason === 'gameover') {
             document.getElementById('overlay-title').innerText = "Game Over!";
             this.lives = 5;
-            this.updateHUD(); // Reset lives on screen
+            this.updateHUD();
         } else {
-            // This part handles the Level Up
-            document.getElementById('overlay-title').innerText = "Level Complete!";
+            // Level was already increased in checkInput/dotClick
             this.saveProgress();
-            this.updateHUD(); // THIS IS THE FIX: updates the level number on screen
+            this.updateHUD(); 
+            document.getElementById('overlay-title').innerText = "Level Complete!";
             this.startBtn.innerText = `Start Level ${this.level}`;
         }
     }
@@ -242,16 +242,13 @@ stopGame(reason) {
     startScrollingGame() {
         const loop = () => { if(this.isPlaying) { this.updatePositions(); this.gameLoopId = requestAnimationFrame(loop); } };
         this.gameLoopId = requestAnimationFrame(loop);
-        
-        // Balanced spawn rate
         let spawnRate = Math.max(1800, 4500 - (this.level * 100)); 
         this.spawnInterval = setInterval(() => this.spawnQuestion(), spawnRate);
     }
 
     spawnQuestion() {
         if(this.questionsAnsweredInLevel + this.activeEntities.length >= 10) return;
-        let content;
-        content = (this.currentGameType === 'math') ? this.generateMath() : this.generateGrammar();
+        let content = (this.currentGameType === 'math') ? this.generateMath() : this.generateGrammar();
 
         const el = document.createElement('div');
         el.className = 'question-bubble';
@@ -260,11 +257,10 @@ stopGame(reason) {
         el.style.left = '-180px';
         this.container.appendChild(el);
         
-        // SLOW AND STEADY SPEED
         this.activeEntities.push({
             el: el,
             x: -180,
-            speed: 0.65 + (this.level * 0.06), 
+            speed: 0.60 + (this.level * 0.05), // Even slower speed
             answer: content.answer.toString().toLowerCase()
         });
     }
@@ -291,32 +287,35 @@ stopGame(reason) {
             this.activeEntities.splice(matchIndex, 1);
             this.questionsAnsweredInLevel++;
             this.input.value = '';
-            if(this.questionsAnsweredInLevel >= 10) { this.level++; this.stopGame('levelup'); }
+            
+            if(this.questionsAnsweredInLevel >= 10) { 
+                this.level++; // Increase level
+                this.updateHUD(); // UPDATE SCREEN INSTANTLY
+                this.stopGame('levelup'); 
+            }
         }
     }
 
     generateMath() {
         let a, b, q, ans;
-        let maxNum = 4 + this.level; 
-        
-        // Cycle through types: 0=Add, 1=Sub, 2=Mult, 3=Div
+        let maxNum = 5 + this.level; 
         let currentType = this.mathTypeCounter % (this.level >= 3 ? 4 : 3);
         this.mathTypeCounter++;
 
-        if(currentType === 0) { // Addition
+        if(currentType === 0) { 
             a = Math.floor(Math.random() * maxNum) + 1;
             b = Math.floor(Math.random() * maxNum) + 1;
             q = `${a} + ${b}`; ans = a + b;
-        } else if(currentType === 1) { // Subtraction
+        } else if(currentType === 1) { 
             b = Math.floor(Math.random() * maxNum) + 1;
             ans = Math.floor(Math.random() * maxNum) + 1;
             a = ans + b;
             q = `${a} - ${b}`;
-        } else if(currentType === 2) { // Multiplication
+        } else if(currentType === 2) { 
             a = Math.floor(Math.random() * 5) + 1; 
             b = Math.floor(Math.random() * 4) + 1;
             q = `${a} × ${b}`; ans = a * b;
-        } else { // Division (Level 3+)
+        } else { 
             ans = Math.floor(Math.random() * 4) + 1;
             b = Math.floor(Math.random() * 3) + 1;
             a = ans * b;
@@ -327,26 +326,29 @@ stopGame(reason) {
 
     generateGrammar() {
         const bank = [
-            {q:"Apple (plural)", a:"apples"}, {q:"Color: Banana", a:"yellow"},
-            {q:"Past: See", a:"saw"}, {q:"Opposite: Big", a:"small"},
-            {q:"A, B, C, D, ___", a:"e"}, {q:"Opposite: Left", a:"right"},
-            {q:"Capital of UK", a:"london"}, {q:"Opposite: Happy", a:"sad"}
+            {q:"Dog (plural)", a:"dogs"}, {q:"Opposite: Cold", a:"hot"},
+            {q:"Color of Sky", a:"blue"}, {q:"Past: Go", a:"went"},
+            {q:"___ are you?", a:"how"}, {q:"Opposite: Up", a:"down"}
         ];
         return bank[Math.floor(Math.random() * bank.length)];
     }
 
     startDotGame() {
         let current = 1;
-        const total = 4 + this.level;
+        const total = 5 + Math.floor(this.level / 2);
         for(let i=1; i<=total; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot'; dot.innerText = i;
-            dot.style.left = (Math.random() * (this.container.clientWidth - 80)) + 'px';
-            dot.style.top = (Math.random() * (this.container.clientHeight - 80)) + 'px';
+            dot.style.left = (Math.random() * (this.container.clientWidth - 60)) + 'px';
+            dot.style.top = (Math.random() * (this.container.clientHeight - 60)) + 'px';
             dot.onclick = () => {
                 if(parseInt(dot.innerText) === current) {
                     dot.remove(); current++;
-                    if(current > total) { this.level++; this.stopGame('levelup'); }
+                    if(current > total) { 
+                        this.level++; 
+                        this.updateHUD(); // UPDATE SCREEN INSTANTLY
+                        this.stopGame('levelup'); 
+                    }
                 } else { this.lives--; this.updateHUD(); if(this.lives <= 0) this.stopGame('gameover'); }
             };
             this.container.appendChild(dot);
@@ -358,4 +360,3 @@ document.getElementById('player-input').addEventListener('input', (e) => gameMan
 </script>
 </body>
 </html>
-
