@@ -232,38 +232,64 @@ class BrainGame {
         }
     }
 
-    startDots() {
-        document.getElementById("timerContainer").classList.remove("hidden");
-        let currentDot = 1;
-        let totalDots = 5 + Math.floor(this.level / 1.5);
-        let timeLeft = 30;
-        
-        document.getElementById("timeDisplay").innerText = timeLeft;
-        this.clockTimer = setInterval(() => {
-            timeLeft--;
-            document.getElementById("timeDisplay").innerText = timeLeft;
-            if(timeLeft <= 0) this.lose();
-        }, 1000);
+startDots() {
+    document.getElementById("timerContainer").classList.remove("hidden");
+    let currentDot = 1;
+    let totalDots = 5 + Math.floor(this.level / 1.5);
+    let timeLeft = 30;
+    const dotRadius = 70; // Minimum distance between dots
+    const placedDots = [];
+    
+    document.getElementById("timeDisplay").innerText = timeLeft;
+    this.clockTimer = setInterval(() => {
+      timeLeft--;
+      document.getElementById("timeDisplay").innerText = timeLeft;
+      if(timeLeft <= 0) this.lose();
+    }, 1000);
 
-        for(let i=1; i<=totalDots; i++) {
-            const d = document.createElement("div");
-            d.className = "dot";
-            d.innerText = i;
-            d.style.left = Math.random() * (document.getElementById("game").clientWidth - 70) + "px";
-            d.style.top = Math.random() * (document.getElementById("game").clientHeight - 70) + "px";
-            d.onclick = () => {
-                if(i === currentDot) {
-                    d.remove();
-                    currentDot++;
-                    if(currentDot > totalDots) this.win();
-                } else {
-                    this.lose();
-                }
-            };
-            document.getElementById("game").appendChild(d);
+    for(let i=1; i<=totalDots; i++){
+      const d = document.createElement("div");
+      d.className = "dot";
+      d.innerText = i;
+      // Ensure lower numbers have higher z-index so they aren't hidden
+      d.style.zIndex = 100 - i; 
+
+      let x, y, overlap;
+      let attempts = 0;
+
+      // Anti-Overlay Logic: Keep looking for a spot until no overlap
+      do {
+        overlap = false;
+        x = Math.random() * (document.getElementById("game").clientWidth - 70);
+        y = Math.random() * (document.getElementById("game").clientHeight - 70);
+        attempts++;
+
+        for (let pos of placedDots) {
+          const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
+          if (distance < dotRadius) {
+            overlap = true;
+            break;
+          }
         }
-    }
+        // Safety break to prevent infinite loops if screen is too full
+      } while (overlap && attempts < 100);
 
+      placedDots.push({x, y});
+      d.style.left = x + "px";
+      d.style.top = y + "px";
+
+      d.onclick = () => {
+        if(i === currentDot) {
+          d.remove();
+          currentDot++;
+          if(currentDot > totalDots) this.win();
+        } else {
+          this.lose();
+        }
+      };
+      document.getElementById("game").appendChild(d);
+    }
+  }
     win() {
         this.stop();
         this.level++;
@@ -313,3 +339,4 @@ document.getElementById("answerInput").addEventListener("input", (e) => {
 
 </body>
 </html>
+
