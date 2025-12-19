@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrainSpeed Trainer Pro</title>
+    <title>BrainSpeed Trainer - Smooth Progress</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -61,29 +61,32 @@
 
         #game-container {
             position: relative;
-            width: 90%;
-            max-width: 800px;
-            height: 400px;
+            width: 95%;
+            max-width: 850px;
+            height: 450px;
             background: white;
             border: 4px solid var(--primary);
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         .question-bubble {
             position: absolute;
-            left: -150px;
+            left: -180px;
             background: var(--accent);
             color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 1.3rem;
-            box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            box-shadow: 2px 4px 15px rgba(0,0,0,0.15);
+            transition: background 0.2s;
         }
 
         .dot {
             position: absolute;
-            width: 45px; height: 45px;
+            width: 50px; height: 50px;
             background: var(--primary);
             color: white;
             border-radius: 50%;
@@ -92,23 +95,26 @@
             justify-content: center;
             font-weight: bold;
             cursor: pointer;
+            font-size: 1.2rem;
         }
 
         #input-area { margin-top: 20px; display: none; }
 
         input {
             padding: 15px;
-            font-size: 1.5rem;
-            width: 300px;
+            font-size: 1.8rem;
+            width: 320px;
             text-align: center;
             border: 3px solid var(--primary);
-            border-radius: 10px;
+            border-radius: 12px;
+            outline: none;
         }
+        input:focus { border-color: var(--accent); }
 
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(44, 62, 80, 0.95);
             color: white;
             display: flex;
             flex-direction: column;
@@ -140,8 +146,8 @@
 
 <div id="game-container">
     <div id="overlay">
-        <h2 id="overlay-title">Welcome!</h2>
-        <p id="overlay-msg">Choose a game above to start training.</p>
+        <h2 id="overlay-title">Ready?</h2>
+        <p id="overlay-msg">Select a game to begin.</p>
         <button class="btn-game hidden" id="start-btn" onclick="gameManager.startGame()">Start Level</button>
         <button class="btn-reset hidden" id="reset-btn" onclick="gameManager.resetCurrentGameProgress()">Reset Game Progress</button>
     </div>
@@ -159,7 +165,7 @@ class GameManager {
         this.currentGameType = null;
         this.isPlaying = false;
         this.questionsAnsweredInLevel = 0;
-        this.usedQuestions = new Set(); // To prevent repeats
+        this.usedQuestions = new Set();
         
         this.activeEntities = []; 
         this.spawnInterval = null;
@@ -171,7 +177,6 @@ class GameManager {
         this.startBtn = document.getElementById('start-btn');
     }
 
-    // --- SAVING LOGIC ---
     saveProgress() {
         localStorage.setItem(`brain_level_${this.currentGameType}`, this.level);
     }
@@ -182,7 +187,7 @@ class GameManager {
     }
 
     resetCurrentGameProgress() {
-        if(confirm("Are you sure you want to go back to Level 1 for this game?")) {
+        if(confirm("Reset this game to Level 1?")) {
             this.level = 1;
             this.saveProgress();
             this.switchGame(this.currentGameType);
@@ -191,7 +196,7 @@ class GameManager {
 
     switchGame(type) {
         this.currentGameType = type;
-        this.level = this.loadProgress(type); // Load saved level
+        this.level = this.loadProgress(type);
         this.lives = 5;
         this.questionsAnsweredInLevel = 0;
         this.usedQuestions.clear();
@@ -203,7 +208,7 @@ class GameManager {
         
         const titles = { math: "Math Master", grammar: "Grammar Dash", dots: "Connect Dots" };
         document.getElementById('overlay-title').innerText = `${titles[type]} - Level ${this.level}`;
-        document.getElementById('overlay-msg').innerText = "Speed increases every level. Good luck!";
+        document.getElementById('overlay-msg').innerText = "Steady progress improves the mind!";
         
         document.getElementById('input-area').style.display = (type === 'dots') ? 'none' : 'block';
     }
@@ -219,7 +224,8 @@ class GameManager {
         this.input.value = '';
         this.input.focus();
         this.activeEntities = [];
-        this.usedQuestions.clear(); // Reset seen questions for the new level
+        this.questionsAnsweredInLevel = 0;
+        this.usedQuestions.clear();
         this.container.innerHTML = '<div id="overlay" class="hidden"></div>'; 
         this.container.appendChild(this.overlay);
 
@@ -238,28 +244,31 @@ class GameManager {
             this.lives = 5;
             this.updateHUD();
         } else if (reason === 'levelup') {
-            document.getElementById('overlay-title').innerText = "Level Cleared!";
-            this.saveProgress(); // SAVE HERE
+            document.getElementById('overlay-title').innerText = "Level Complete!";
+            this.saveProgress();
             this.startBtn.innerText = `Start Level ${this.level}`;
         }
     }
 
-    // --- MATH & GRAMMAR ENGINE ---
     startScrollingGame() {
-        const loop = () => { if(this.isPlaying) { this.updatePositions(); this.gameLoopId = requestAnimationFrame(loop); } };
+        const loop = () => { 
+            if(this.isPlaying) { 
+                this.updatePositions(); 
+                this.gameLoopId = requestAnimationFrame(loop); 
+            } 
+        };
         this.gameLoopId = requestAnimationFrame(loop);
 
-        let spawnRate = Math.max(800, 3000 - (this.level * 100)); 
+        // SLOWER SPAWN RATE logic
+        let spawnRate = Math.max(1200, 3500 - (this.level * 80)); 
         this.spawnInterval = setInterval(() => this.spawnQuestion(), spawnRate);
     }
 
     spawnQuestion() {
-        if(this.questionsAnsweredInLevel >= 10) return;
+        if(this.questionsAnsweredInLevel + this.activeEntities.length >= 10) return;
 
         let content;
         let attempts = 0;
-        
-        // Loop until we find a question not used in this level
         do {
             content = (this.currentGameType === 'math') ? this.generateMath() : this.generateGrammar();
             attempts++;
@@ -270,36 +279,43 @@ class GameManager {
         const el = document.createElement('div');
         el.className = 'question-bubble';
         el.innerText = content.text;
-        el.style.top = Math.random() * (this.container.clientHeight - 60) + 'px';
-        el.style.left = '0px';
+        el.style.top = (20 + Math.random() * (this.container.clientHeight - 80)) + 'px';
+        el.style.left = '-150px';
 
         this.container.appendChild(el);
+        
+        // SLOWER SPEED logic: 1.0 base + only 0.1 increase per level
         this.activeEntities.push({
             el: el,
-            x: 0,
-            speed: 1.2 + (this.level * 0.3),
+            x: -150,
+            speed: 1.0 + (this.level * 0.12), 
             answer: content.answer.toString().toLowerCase()
         });
     }
 
     updatePositions() {
-        this.activeEntities.forEach((entity, index) => {
+        const containerWidth = this.container.clientWidth;
+        for (let i = this.activeEntities.length - 1; i >= 0; i--) {
+            let entity = this.activeEntities[i];
             entity.x += entity.speed;
             entity.el.style.left = entity.x + 'px';
-            if (entity.x > this.container.clientWidth - 50) {
+            
+            if (entity.x > containerWidth) {
                 entity.el.remove();
-                this.activeEntities.splice(index, 1);
+                this.activeEntities.splice(i, 1);
                 this.lives--;
                 this.updateHUD();
                 if(this.lives <= 0) this.stopGame('gameover');
             }
-        });
+        }
     }
 
     checkInput(val) {
         const matchIndex = this.activeEntities.findIndex(e => e.answer === val.toLowerCase().trim());
         if (matchIndex !== -1) {
-            this.activeEntities[matchIndex].el.remove();
+            this.activeEntities[matchIndex].el.style.background = "#2ecc71";
+            const entity = this.activeEntities[matchIndex];
+            setTimeout(() => entity.el.remove(), 100);
             this.activeEntities.splice(matchIndex, 1);
             this.questionsAnsweredInLevel++;
             this.input.value = '';
@@ -311,43 +327,60 @@ class GameManager {
     }
 
     generateMath() {
-        const range = 5 + this.level;
-        const a = Math.floor(Math.random() * range) + 1;
-        const b = Math.floor(Math.random() * range) + 1;
-        const ops = ['+', '-'];
-        if(this.level > 3) ops.push('*');
-        const op = ops[Math.floor(Math.random() * ops.length)];
+        // GENTLE MATH SCALING
+        let a, b, q, ans;
+        let maxNum = 5 + (this.level * 2); // Level 2 max is 9, Level 10 max is 25
         
-        let q, ans;
-        if(op === '+') { q = `${a}+${b}`; ans = a+b; }
-        else if(op === '-') { q = `${a+b}-${a}`; ans = b; }
-        else { q = `${a}x${b}`; ans = a*b; }
+        const ops = ['+'];
+        if(this.level > 3) ops.push('-');
+        if(this.level > 7) ops.push('*');
+        const op = ops[Math.floor(Math.random() * ops.length)];
+
+        if(op === '+') {
+            a = Math.floor(Math.random() * maxNum) + 1;
+            b = Math.floor(Math.random() * maxNum) + 1;
+            q = `${a}+${b}`; ans = a + b;
+        } else if(op === '-') {
+            ans = Math.floor(Math.random() * maxNum) + 1;
+            b = Math.floor(Math.random() * maxNum) + 1;
+            a = ans + b; // Always results in a positive 'ans'
+            q = `${a}-${b}`;
+        } else {
+            // Multiplication stays small longer
+            a = Math.floor(Math.random() * Math.min(this.level, 10)) + 2;
+            b = Math.floor(Math.random() * 5) + 1;
+            q = `${a}x${b}`; ans = a * b;
+        }
         return { text: q, answer: ans };
     }
 
     generateGrammar() {
         const bank = [
-            {q:"Apple (color)", a:"red"}, {q:"12 months = 1 ___", a:"year"},
-            {q:"Opposite of Big", a:"small"}, {q:"Past of Eat", a:"ate"},
-            {q:"___ are you?", a:"who"}, {q:"Sun rises in...", a:"east"},
-            {q:"A, E, I, O, ___", a:"u"}, {q:"Dog (plural)", a:"dogs"}
+            {q:"Past of Run", a:"ran"}, {q:"Blue + Red =", a:"purple"},
+            {q:"Water (ice/hot)", a:"ice"}, {q:"A, B, C, ___", a:"d"},
+            {q:"Opposite of Fast", a:"slow"}, {q:"10, 20, 30, ___", a:"40"},
+            {q:"I ___ a student", a:"am"}, {q:"Sky (color)", a:"blue"},
+            {q:"Opposite of In", a:"out"}, {q:"Sun (hot/cold)", a:"hot"}
         ];
         return bank[Math.floor(Math.random() * bank.length)];
     }
 
     startDotGame() {
         let current = 1;
-        const total = 5 + this.level;
+        const total = 5 + Math.floor(this.level / 2);
         for(let i=1; i<=total; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot'; dot.innerText = i;
-            dot.style.left = Math.random() * (this.container.clientWidth - 50) + 'px';
-            dot.style.top = Math.random() * (this.container.clientHeight - 50) + 'px';
+            dot.style.left = (Math.random() * (this.container.clientWidth - 60)) + 'px';
+            dot.style.top = (Math.random() * (this.container.clientHeight - 60)) + 'px';
             dot.onclick = () => {
                 if(parseInt(dot.innerText) === current) {
                     dot.remove(); current++;
                     if(current > total) { this.level++; this.stopGame('levelup'); }
-                } else { this.lives--; this.updateHUD(); if(this.lives <= 0) this.stopGame('gameover'); }
+                } else { 
+                    this.lives--; this.updateHUD(); 
+                    if(this.lives <= 0) this.stopGame('gameover'); 
+                }
             };
             this.container.appendChild(dot);
         }
