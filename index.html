@@ -105,7 +105,6 @@
             overflow: hidden;
         }
 
-        /* OVERLAYS */
         .full-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -127,9 +126,8 @@
             max-width: 500px;
             margin-bottom: 20px;
             text-align: left;
+            font-size: 0.9rem;
         }
-
-        .tutorial-box b { color: var(--accent); }
 
         .hidden { display: none !important; }
 
@@ -154,14 +152,13 @@
             outline: none;
         }
 
-        /* GAME OBJECTS */
         .question-bubble {
             position: absolute;
             background: var(--accent);
             color: white;
             padding: 10px 20px;
             border-radius: 30px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             box-shadow: 0 0 15px var(--accent);
             white-space: nowrap;
@@ -221,12 +218,12 @@
     </div>
 
     <div id="tutorial-overlay" class="full-overlay hidden">
-        <h2 style="color: var(--accent);">HOW TO PLAY</h2>
+        <h2 style="color: var(--accent);">TUTORIAL</h2>
         <div class="tutorial-box">
-            <p>1. <b>MATH / GRAMMAR:</b> Solve problems as they scroll. Type the answer and hit enter (or it will auto-check). Don't let them hit the right wall!</p>
-            <p>2. <b>DOTS:</b> Click the numbers in order (1, 2, 3...) before time runs out. <b>Overlapping is now disabled</b> for better visibility.</p>
+            <p>• <b>MATH & GRAMMAR:</b> Answers scroll from left to right. Don't let them reach the end! Type the answer to clear them.</p>
+            <p>• <b>DOTS:</b> Click the numbers in order (1, 2, 3...). Overlapping has been disabled.</p>
         </div>
-        <button onclick="gameManager.closeTutorial()">GOT IT!</button>
+        <button onclick="gameManager.closeTutorial()">START PLAYING</button>
     </div>
 
     <div id="overlay" class="full-overlay hidden">
@@ -248,8 +245,19 @@ class GameManager {
         this.currentGameType = null;
         this.isPlaying = false;
         this.activeEntities = []; 
-        this.mathTypeCounter = 0;
+        this.lastQuestionIndex = -1;
         this.container = document.getElementById('game-container');
+
+        // Extended Grammar Library
+        this.grammarBank = [
+            {q:"Happy (opp.)", a:"sad"}, {q:"Go (past)", a:"went"}, {q:"Color: Grass", a:"green"}, 
+            {q:"Fast (opp.)", a:"slow"}, {q:"Up (opp.)", a:"down"}, {q:"Eat (past)", a:"ate"},
+            {q:"Big (opp.)", a:"small"}, {q:"See (past)", a:"saw"}, {q:"Color: Sky", a:"blue"},
+            {q:"Hot (opp.)", a:"cold"}, {q:"Run (past)", a:"ran"}, {q:"Hard (opp.)", a:"soft"},
+            {q:"Win (opp.)", a:"lose"}, {q:"Color: Fire", a:"red"}, {q:"Buy (past)", a:"bought"},
+            {q:"Rich (opp.)", a:"poor"}, {q:"Do (past)", a:"did"}, {q:"Old (opp.)", a:"new"},
+            {q:"Give (past)", a:"gave"}, {q:"Day (opp.)", a:"night"}, {q:"Color: Snow", a:"white"}
+        ];
 
         if (this.nickname) this.initUser();
     }
@@ -258,8 +266,6 @@ class GameManager {
         document.getElementById('name-overlay').classList.add('hidden');
         document.getElementById('display-nickname').innerText = this.nickname.toUpperCase();
         this.refreshHighScores();
-        
-        // Show tutorial only once per user
         if (!localStorage.getItem(`bs_tut_${this.nickname}`)) {
             document.getElementById('tutorial-overlay').classList.remove('hidden');
         }
@@ -311,7 +317,7 @@ class GameManager {
         this.updateTheme();
         document.getElementById('best-alert').classList.add('hidden');
         document.getElementById('overlay').classList.remove('hidden');
-        document.getElementById('overlay-title').innerText = `${type.toUpperCase()} - LEVEL ${this.level}`;
+        document.getElementById('overlay-title').innerText = `${type.toUpperCase()} - LVL ${this.level}`;
         document.getElementById('input-area').style.display = (type === 'dots') ? 'none' : 'block';
         document.getElementById('timer-box').className = (type === 'dots') ? "" : "hidden";
     }
@@ -332,7 +338,6 @@ class GameManager {
         this.activeEntities = [];
         this.questionsAnsweredInLevel = 0;
         
-        // Clear board but keep overlays
         const overlays = Array.from(this.container.children).filter(c => c.classList.contains('full-overlay'));
         this.container.innerHTML = '';
         overlays.forEach(o => this.container.appendChild(o));
@@ -377,30 +382,36 @@ class GameManager {
     startScrollingGame() {
         const loop = () => { if(this.isPlaying) { this.updatePositions(); this.gameLoopId = requestAnimationFrame(loop); } };
         this.gameLoopId = requestAnimationFrame(loop);
-        let rate = Math.max(800, 3000 - (this.level * 150)); 
+        let rate = Math.max(800, 3200 - (this.level * 150)); 
         this.spawnInterval = setInterval(() => this.spawnQuestion(), rate);
     }
 
     spawnQuestion() {
         if(!this.isPlaying || (this.questionsAnsweredInLevel + this.activeEntities.length >= 10)) return;
         let q, a;
+
         if(this.currentGameType === 'grammar') {
-            let bank = [{q:"Cold (opp.)", a:"hot"}, {q:"Eat (past)", a:"ate"}, {q:"Color: Sun", a:"yellow"}, {q:"Up (opp.)", a:"down"}];
-            let item = bank[Math.floor(Math.random() * bank.length)];
-            q = item.q; a = item.a;
+            let idx;
+            do {
+                idx = Math.floor(Math.random() * this.grammarBank.length);
+            } while (idx === this.lastQuestionIndex); // Don't repeat the same one immediately
+            this.lastQuestionIndex = idx;
+            q = this.grammarBank[idx].q;
+            a = this.grammarBank[idx].a;
         } else {
             let m = this.generateMath(); q = m.q; a = m.a;
         }
+
         const el = document.createElement('div');
         el.className = 'question-bubble';
         el.innerText = q;
         el.style.top = (20 + Math.random() * (this.container.clientHeight - 60)) + 'px';
         this.container.appendChild(el);
-        this.activeEntities.push({ el, x: -250, speed: 1.2 + (this.level * 0.1), answer: a.toString() });
+        this.activeEntities.push({ el, x: -250, speed: 1.3 + (this.level * 0.12), answer: a.toString() });
     }
 
     generateMath() {
-        let a, b, q, ans, type = this.mathTypeCounter++ % 4;
+        let a, b, q, ans, type = Math.floor(Math.random() * 4);
         let m = 5 + this.level;
         if(type === 0) { a=rand(m); b=rand(m); q=`${a}+${b}`; ans=a+b; }
         else if(type === 1) { ans=rand(m); b=rand(m); a=ans+b; q=`${a}-${b}`; }
@@ -433,19 +444,19 @@ class GameManager {
         let current = 1;
         const total = 5 + Math.floor(this.level / 1.5);
         const dots = [];
-        const minBuffer = 85; 
+        const minBuffer = 90; 
 
         for(let i=1; i<=total; i++) {
             let x, y, overlap, tries = 0;
             do {
                 overlap = false;
-                x = 20 + Math.random() * (this.container.clientWidth - 100);
-                y = 20 + Math.random() * (this.container.clientHeight - 100);
+                x = 30 + Math.random() * (this.container.clientWidth - 110);
+                y = 30 + Math.random() * (this.container.clientHeight - 110);
                 for(let d of dots) {
                     if(Math.hypot(x - d.x, y - d.y) < minBuffer) { overlap = true; break; }
                 }
                 tries++;
-            } while(overlap && tries < 300);
+            } while(overlap && tries < 400);
 
             const dot = document.createElement('div');
             dot.className = 'dot'; dot.innerText = i;
