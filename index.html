@@ -200,12 +200,36 @@ class GameManager {
         
         this.quotes = ["Focus!", "Stay sharp!", "Again!", "Speed up!", "Don't quit!"];
         
-        this.grammarBank = [
-            {q:"Happy (opp.)", a:"sad"}, {q:"Go (past)", a:"went"}, {q:"Color of grass", a:"green"},
-            {q:"Ice (opp.)", a:"fire"}, {q:"Eat (past)", a:"ate"}, {q:"Opposite: In", a:"out"},
-            {q:"Sun color", a:"yellow"}, {q:"Fast (opp.)", a:"slow"}, {q:"Sea color", a:"blue"},
-            {q:"Hot (opp.)", a:"cold"}, {q:"Up (opp.)", a:"down"}, {q:"Buy (past)", a:"bought"}
-        ];
+this.grammarBank = [
+    // Original Questions
+    {q:"Happy (opp.)", a:"sad"}, {q:"Go (past)", a:"went"}, {q:"Color of grass", a:"green"},
+    {q:"Ice (opp.)", a:"fire"}, {q:"Eat (past)", a:"ate"}, {q:"Opposite: In", a:"out"},
+    {q:"Sun color", a:"yellow"}, {q:"Fast (opp.)", a:"slow"}, {q:"Sea color", a:"blue"},
+    {q:"Hot (opp.)", a:"cold"}, {q:"Up (opp.)", a:"down"}, {q:"Buy (past)", a:"bought"},
+
+    // Opposites (Antonyms)
+    {q:"Big (opp.)", a:"small"}, {q:"Hard (opp.)", a:"soft"}, {q:"Old (opp.)", a:"new"},
+    {q:"Dark (opp.)", a:"light"}, {q:"Rich (opp.)", a:"poor"}, {q:"Left (opp.)", a:"right"},
+    {q:"Full (opp.)", a:"empty"}, {q:"Wet (opp.)", a:"dry"}, {q:"Win (opp.)", a:"lose"},
+    {q:"Cheap (opp.)", a:"expensive"}, {q:"Strong (opp.)", a:"weak"}, {q:"Early (opp.)", a:"late"},
+
+    // Verbs (Past Tense)
+    {q:"See (past)", a:"saw"}, {q:"Run (past)", a:"ran"}, {q:"Sleep (past)", a:"slept"},
+    {q:"Drink (past)", a:"drank"}, {q:"Speak (past)", a:"spoke"}, {q:"Write (past)", a:"wrote"},
+    {q:"Take (past)", a:"took"}, {q:"Give (past)", a:"gave"}, {q:"Find (past)", a:"found"},
+    {q:"Think (past)", a:"thought"}, {q:"Make (past)", a:"made"}, {q:"Come (past)", a:"came"},
+
+    // Plurals
+    {q:"Child (plural)", a:"children"}, {q:"Foot (plural)", a:"feet"}, {q:"Mouse (plural)", a:"mice"},
+    {q:"Tooth (plural)", a:"teeth"}, {q:"Man (plural)", a:"men"}, {q:"Leaf (plural)", a:"leaves"},
+
+    // Colors & General Knowledge
+    {q:"Color of coal", a:"black"}, {q:"Color of snow", a:"white"}, {q:"Color of a carrot", a:"orange"},
+    {q:"Capital of France", a:"paris"}, {q:"A person who flies planes", a:"pilot"},
+    {q:"The month after May", a:"june"}, {q:"Number of days in a week", a:"seven"},
+    {q:"A baby dog is a...", a:"puppy"}, {q:"Opposite of North", a:"south"},
+    {q:"The star that shines by day", a:"sun"}, {q:"Frozen water is...", a:"ice"}
+];
     }
 
     playTick(freq = 440, duration = 0.05) {
@@ -425,3 +449,4 @@ document.getElementById('player-input').addEventListener('input', (e) => gameMan
 </script>
 </body>
 </html>
+
