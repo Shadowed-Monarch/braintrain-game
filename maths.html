@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Math Speed</title>
+    <style>
+        :root { --primary: #000; --accent: #e74c3c; --text: #fff; }
+        body { font-family: sans-serif; background-color: var(--primary); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        header { width: 100%; background: rgba(142, 0, 0, 0.5); padding: 10px; text-align: center; border-bottom: 4px solid var(--accent); }
+        .back-btn { position: absolute; left: 10px; top: 15px; color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 10px; border-radius: 5px; }
+        #game-container { position: relative; width: 95%; max-width: 850px; height: 400px; background: #1a1a1a; border: 3px solid var(--accent); border-radius: 10px; overflow: hidden; margin-top: 20px; }
+        .question-bubble { position: absolute; background: var(--accent); color: white; padding: 10px 18px; border-radius: 20px; font-weight: bold; white-space: nowrap; z-index: 5; }
+        #input-area { width: 100%; margin-top: 15px; text-align: center; }
+        input { padding: 12px; font-size: 1.2rem; width: 80%; max-width: 350px; background: #222; color: var(--accent); border: 2px solid var(--accent); border-radius: 8px; outline: none; }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        #overlay button { background: var(--primary); color: white; border: 2px solid var(--accent); padding: 12px 30px; font-size: 1.1rem; cursor: pointer; border-radius: 8px; margin: 10px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-btn">⬅ HOME</a>
+        <h1 style="margin:0; font-size: 1.2rem;">MATH SPEED: LVL <span id="lvl">1</span></h1>
+    </header>
+
+    <div id="game-container">
+        <div id="overlay">
+            <h2 id="title">READY?</h2>
+            <button onclick="game.startGame()">START</button>
+            <button onclick="game.reset()" style="font-size:0.7rem; border:none; text-decoration:underline;">Reset Progress</button>
+        </div>
+    </div>
+
+    <div id="input-area"><input type="number" id="ans" placeholder="Type answer..." autocomplete="off"></div>
+
+    <script>
+        class MathGame {
+            constructor() {
+                this.level = parseInt(localStorage.getItem('rs_pro_v3_math')) || 1;
+                this.isPlaying = false;
+                this.active = [];
+                this.count = 0;
+                document.getElementById('lvl').innerText = this.level;
+                const savedBg = localStorage.getItem('user_bg_choice');
+                if(savedBg) document.body.style.backgroundColor = savedBg;
+            }
+            reset() { if(confirm("Reset Level?")) { localStorage.setItem('rs_pro_v3_math', 1); location.reload(); } }
+            startGame() {
+                this.isPlaying = true; this.count = 0; this.active = [];
+                document.getElementById('overlay').classList.add('hidden');
+                document.getElementById('ans').focus();
+                this.loop();
+                this.spawnInt = setInterval(() => this.spawn(), 2000);
+            }
+            spawn() {
+                if(!this.isPlaying || this.count + this.active.length >= 10) return;
+                const a = Math.floor(Math.random() * (this.level + 5)) + 1;
+                const b = Math.floor(Math.random() * (this.level + 5)) + 1;
+                const el = document.createElement('div');
+                el.className = 'question-bubble';
+                el.innerText = `${a} + ${b}`;
+                el.style.top = (Math.random() * 300 + 50) + 'px';
+                document.getElementById('game-container').appendChild(el);
+                // SPEED APPLIED HERE
+                let speed = 0.7 + (this.level * 0.1);
+                this.active.push({ el, x: -100, speed, a: (a+b).toString() });
+            }
+            loop() {
+                if(!this.isPlaying) return;
+                this.active.forEach((ent, i) => {
+                    ent.x += ent.speed;
+                    ent.el.style.transform = `translateX(${ent.x}px)`;
+                    if(ent.x > 850) this.end('FAIL');
+                });
+                requestAnimationFrame(() => this.loop());
+            }
+            end(txt) {
+                this.isPlaying = false; clearInterval(this.spawnInt);
+                document.getElementById('overlay').classList.remove('hidden');
+                document.getElementById('title').innerText = txt;
+                if(txt === 'SUCCESS') {
+                    this.level++; localStorage.setItem('rs_pro_v3_math', this.level);
+                    document.getElementById('lvl').innerText = this.level;
+                }
+            }
+        }
+        const game = new MathGame();
+        document.getElementById('ans').addEventListener('input', (e) => {
+            const idx = game.active.findIndex(ent => ent.a === e.target.value);
+            if(idx !== -1) {
+                game.active[idx].el.remove(); game.active.splice(idx, 1);
+                e.target.value = ''; game.count++;
+                if(game.count >= 10) game.end('SUCCESS');
+            }
+        });
+    </script>
+</body>
+</html>
