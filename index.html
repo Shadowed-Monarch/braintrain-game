@@ -13,6 +13,7 @@
         .hero { text-align: center; margin: 20px 0 40px 0; }
         .hero h1 { font-size: 3rem; margin: 0; letter-spacing: 4px; font-weight: 900; }
         .hero p { color: #666; letter-spacing: 2px; margin-top: 5px; text-transform: uppercase; font-size: 0.9rem; }
+        .dev-credit { font-size: 0.7rem; color: #444; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
 
         .rank-container { width: 90%; max-width: 450px; background: #111; padding: 15px; border-radius: 20px; border: 1px solid #222; margin-bottom: 40px; text-align: center; }
         .rank-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px; }
@@ -21,7 +22,6 @@
         .progress-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 10px; }
         .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.8s ease; box-shadow: 0 0 10px var(--accent); }
 
-
         .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; width: 90%; max-width: 1100px; }
         .game-card { background: var(--panel); border: 1px solid #1a1a1a; border-radius: 20px; padding: 30px; text-align: center; transition: 0.3s; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; }
         .game-card img { width: 80px; height: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); transition: 0.3s; }
@@ -29,19 +29,24 @@
         .game-card:hover { border-color: var(--accent); transform: translateY(-10px); background: #0f0f0f; }
         .game-card:hover img { transform: scale(1.1); filter: drop-shadow(0 0 15px var(--accent)); }
 
-        .brain-display { background: rgba(255, 119, 255, 0.1); padding: 8px 18px; border-radius: 12px; color: var(--brain); font-weight: bold; border: 2px solid var(--brain); display: flex; align-items: center; gap: 10px; }
+        .brain-display { background: rgba(255, 119, 255, 0.1); padding: 8px 18px; border-radius: 12px; color: var(--brain); font-weight: bold; border: 2px solid var(--brain); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .brain-display:active { transform: scale(0.95); }
         
-        #shop-btn { margin: 40px 0; background: none; border: 1px solid #333; color: #666; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        #shop-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        #shop-btn { margin: 40px 0 10px 0; background: none; border: 1px solid #333; color: #666; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        #shop-btn:hover { border-color: var(--accent); color: #fff; }
+
+        #shop-overlay, #dev-console { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .shop-item { width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+        
+        #dev-code { padding: 15px; background: #111; border: 1px solid #333; color: var(--accent); text-align: center; font-family: monospace; outline: none; border-radius: 10px; margin-top: 20px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <header>
         <div style="font-size: 1.2rem; font-weight: bold;">BRAIN<span style="color:var(--accent)">TRAIN</span></div>
-        <div class="brain-display">
+        <div class="brain-display" id="brain-clicker">
             <span>🧠</span>
             <span id="brains">0</span>
         </div>
@@ -50,25 +55,21 @@
     <div class="hero">
         <h1>BRAIN TRAIN</h1>
         <p>Master your mind speed.</p>
-        <div style="font-size: 0.7rem; color: #444; margin-top: 10px; letter-spacing: 1px;">
-        SHADOWED
-    </div>
+        <div class="dev-credit">DEVELOPED BY SHADOWED</div>
     </div>
 
-<div class="rank-container">
-    <div class="rank-header">
-        <span id="rank-icon">🎓</span>
-        <div id="rank-name" class="rank-title">STUDENT</div>
+    <div class="rank-container">
+        <div class="rank-header">
+            <span id="rank-icon">🎓</span>
+            <div id="rank-name" class="rank-title">STUDENT</div>
+        </div>
+        <div class="progress-bg">
+            <div id="rank-progress" class="progress-fill"></div>
+        </div>
+        <div id="next-rank-info" style="color: #666; font-size: 0.8rem; margin-top: 8px; text-align: center;">
+            Next: Scholar at 500 (Current: <span id="rank-score" style="color:var(--brain)">0</span> 🧠)
+        </div>
     </div>
-    
-    <div class="progress-bg">
-        <div id="rank-progress" class="progress-fill"></div>
-    </div>
-
-    <div id="next-rank-info" style="color: #666; font-size: 0.8rem; margin-top: 8px; text-align: center;">
-        Next: Scholar at 500 (Current: <span id="rank-score" style="color:var(--brain)">0</span> 🧠)
-    </div>
-</div>
     
     <div class="games-grid">
         <a href="math.html" class="game-card">
@@ -86,13 +87,18 @@
     </div>
 
     <button id="shop-btn" onclick="toggleShop()">🎨 OPEN SKIN SHOP</button>
-
-<a href="about.html" style="color: #444; text-decoration: none; font-size: 0.8rem; margin-top: 10px;">ABOUT BRAIN TRAIN</a>
+    <a href="about.html" style="color: #444; text-decoration: none; font-size: 0.8rem; margin-bottom: 40px;">ABOUT BRAIN TRAIN</a>
     
     <div id="shop-overlay">
         <h2>SKIN SHOP</h2>
         <div class="shop-grid" id="shop-grid"></div>
         <button onclick="toggleShop()" style="margin-top:40px; color:#fff; background:none; border:none; cursor:pointer;">CLOSE</button>
+    </div>
+
+    <div id="dev-console">
+        <h2 style="color:var(--accent); font-family:monospace;">DEV CONSOLE</h2>
+        <input type="text" id="dev-code" placeholder="ENTER SECRET CODE" autocomplete="off">
+        <button onclick="toggleDev()" style="margin-top:20px; color:#555; background:none; border:none; cursor:pointer;">EXIT</button>
     </div>
 
     <script>
@@ -109,35 +115,34 @@
         ];
 
         const ranks = [
-            { name: "Student", min: 0, next: 500, icon: "🎓" },
-            { name: "Scholar", min: 500, next: 2000, icon: "📜" },
-            { name: "Genius", min: 2000, next: 5000, icon: "💡" },
-            { name: "Mastermind", min: 5000, next: 10000, icon: "👑" },
-            { name: "Overlord", min: 10000, next: 999999, icon: "🌌" }
+            { name: "Student", min: 0, icon: "🎓" },
+            { name: "Scholar", min: 500, icon: "📜" },
+            { name: "Genius", min: 2000, icon: "💡" },
+            { name: "Mastermind", min: 5000, icon: "👑" },
+            { name: "Overlord", min: 10000, icon: "🌌" }
         ];
 
-function updateUI() {
+        function updateUI() {
+            document.getElementById('brains').innerText = userBrains;
+            document.getElementById('rank-score').innerText = userBrains;
 
-    document.getElementById('brains').innerText = userBrains;
-    
-    document.getElementById('rank-score').innerText = userBrains;
+            let currentRank = ranks[0];
+            let nextRank = ranks[1] || ranks[0];
+            
+            for (let i = 0; i < ranks.length; i++) {
+                if (userBrains >= ranks[i].min) {
+                    currentRank = ranks[i];
+                    nextRank = ranks[i + 1] || { name: "MAX", min: userBrains, icon: "🌌" };
+                }
+            }
 
-    let currentRank = ranks[0];
-    let nextRank = ranks[1];
-    
-    for (let i = 0; i < ranks.length; i++) {
-        if (userBrains >= ranks[i].min) {
-            currentRank = ranks[i];
-            nextRank = ranks[i + 1] || { name: "MAX", min: userBrains, icon: "🌌" };
-        }
-    }
+            document.getElementById('rank-name').innerText = currentRank.name;
+            document.getElementById('rank-icon').innerText = currentRank.icon;
+            document.getElementById('next-rank-info').innerHTML = `Next: ${nextRank.name} at ${nextRank.min} (Current: <span style="color:var(--brain)">${userBrains}</span> 🧠)`;
 
-    document.getElementById('rank-name').innerText = currentRank.name;
-    document.getElementById('rank-icon').innerText = currentRank.icon;
-    document.getElementById('next-rank-info').innerHTML = `Next: ${nextRank.name} at ${nextRank.min} (Current: <span style="color:var(--brain)">${userBrains}</span> 🧠)`;
-
-    let progress = ((userBrains - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
-    document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
+            let progress = ((userBrains - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
+            if (nextRank.name === "MAX") progress = 100;
+            document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
 
             const skin = colors.find(c => c.id === currentSkin);
             document.documentElement.style.setProperty('--accent', skin.hex);
@@ -164,6 +169,37 @@ function updateUI() {
             const s = document.getElementById('shop-overlay');
             s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
         }
+
+        // --- DEV CONSOLE LOGIC ---
+        let clickCount = 0;
+        let clickTimer;
+        document.getElementById('brain-clicker').onclick = function() {
+            clickCount++;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+            if (clickCount === 5) { toggleDev(); clickCount = 0; }
+        };
+
+        function toggleDev() {
+            const d = document.getElementById('dev-console');
+            d.style.display = (d.style.display === 'flex') ? 'none' : 'flex';
+            if(d.style.display === 'flex') document.getElementById('dev-code').focus();
+        }
+
+        document.getElementById('dev-code').onkeypress = function(e) {
+            if (e.key === 'Enter') {
+                const val = this.value.toUpperCase();
+                if (val === 'GODMODE') { userBrains = 99999; localStorage.setItem('bt_coins', userBrains); updateUI(); }
+                if (val === 'RESET') { localStorage.clear(); location.reload(); }
+                if (val === 'UNLOCK') { 
+                    localStorage.setItem('bt_unlocked', 100); 
+                    localStorage.setItem('bt_unlocked_dots', 100); 
+                    localStorage.setItem('bt_unlocked_grammar', 100); 
+                    location.reload(); 
+                }
+                this.value = ''; toggleDev();
+            }
+        };
 
         updateUI();
     </script>
