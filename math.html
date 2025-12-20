@@ -27,7 +27,13 @@
         <div style="font-weight: bold; color: var(--accent);">LVL <span id="display-lvl">1</span></div>
         <div class="brain-wrap"><span>🧠</span> <span id="cur-brains">0</span></div>
     </header>
-    <div id="game-container"><div id="overlay"><h2 id="m-title" style="margin:0 0 10px 0;">SELECT LEVEL</h2><div class="level-grid" id="lvl-grid"></div><button class="start-btn" onclick="game.start()">START TRAIN</button></div></div>
+    <div id="game-container">
+        <div id="overlay">
+            <h2 id="m-title" style="margin:0 0 10px 0;">SELECT LEVEL</h2>
+            <div class="level-grid" id="lvl-grid"></div>
+            <button class="start-btn" id="main-start-btn" onclick="game.start()">START TRAIN</button>
+        </div>
+    </div>
     <input type="number" id="ans" placeholder="?" autocomplete="off">
     <p style="color:#888; margin: 10px 0;">SOLVED: <span id="count" style="color:white">0</span>/10</p>
 
@@ -60,15 +66,11 @@
                         btn.classList.add('unlocked');
                         btn.onclick = () => { 
                             selectedLvl = i; 
-                            
-                            // Reset Overlay: Show original Start button, remove Play Again/Next
                             const overlay = document.getElementById('overlay');
                             overlay.querySelectorAll('.temp-btn').forEach(b => b.remove());
-                            overlay.querySelector('.start-btn').style.display = 'block';
+                            document.getElementById('main-start-btn').style.display = 'block';
                             document.getElementById('m-title').innerText = "SELECT LEVEL";
-
-                            this.initMenu(); 
-                            this.updateUI(); 
+                            this.initMenu(); this.updateUI(); 
                         };
                     }
                     if (i === selectedLvl) btn.classList.add('active');
@@ -108,10 +110,7 @@
                 this.isPlaying = false; if(this.active) this.active.el.remove(); this.active = null;
                 const overlay = document.getElementById('overlay');
                 overlay.style.display = 'flex';
-
-                // Hide original Start button and remove any existing temp buttons
-                const mainStartBtn = overlay.querySelector('.start-btn');
-                mainStartBtn.style.display = 'none';
+                document.getElementById('main-start-btn').style.display = 'none';
                 overlay.querySelectorAll('.temp-btn').forEach(b => b.remove());
 
                 if(win) {
@@ -119,25 +118,16 @@
                     this.brains += (selectedLvl * 10);
                     if (selectedLvl === this.unlockedLvl) { this.unlockedLvl++; localStorage.setItem('bt_unlocked', this.unlockedLvl); }
                     localStorage.setItem('bt_coins', this.brains); 
-                    this.initMenu(); 
-                    this.updateUI();
+                    this.initMenu(); this.updateUI();
 
-                    // Add NEXT LEVEL button
                     const nextBtn = document.createElement('button');
                     nextBtn.className = 'start-btn temp-btn';
                     nextBtn.innerText = "NEXT LEVEL";
                     nextBtn.style.marginTop = "10px";
-                    nextBtn.onclick = () => {
-                        selectedLvl++;
-                        this.initMenu();
-                        this.updateUI();
-                        this.start();
-                    };
+                    nextBtn.onclick = () => { selectedLvl++; this.initMenu(); this.updateUI(); this.start(); };
                     overlay.appendChild(nextBtn);
                 } else { 
                     document.getElementById('m-title').innerText = "GAME OVER"; 
-
-                    // Add PLAY AGAIN button
                     const retryBtn = document.createElement('button');
                     retryBtn.className = 'start-btn temp-btn';
                     retryBtn.innerText = "PLAY AGAIN";
