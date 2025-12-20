@@ -60,6 +60,7 @@
             }
             initMenu() {
                 const grid = document.getElementById('lvl-grid'); grid.innerHTML = '';
+                document.getElementById('display-lvl').innerText = selectedLvl;
                 for (let i = 1; i <= 100; i++) {
                     const btn = document.createElement('button'); btn.innerText = i; btn.className = 'lvl-btn';
                     if (i <= this.unlockedLvl) {
@@ -70,7 +71,8 @@
                             overlay.querySelectorAll('.temp-btn').forEach(b => b.remove());
                             document.getElementById('main-start-btn').style.display = 'block';
                             document.getElementById('m-title').innerText = "SELECT LEVEL";
-                            this.initMenu(); this.updateUI(); 
+                            this.initMenu(); 
+                            this.updateUI(); 
                         };
                     }
                     if (i === selectedLvl) btn.classList.add('active');
