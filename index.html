@@ -10,12 +10,10 @@
         
         header { width: 100%; max-width: 1100px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
 
-        /* HERO SECTION */
         .hero { text-align: center; margin: 20px 0 40px 0; }
         .hero h1 { font-size: 3rem; margin: 0; letter-spacing: 4px; font-weight: 900; }
         .hero p { color: #666; letter-spacing: 2px; margin-top: 5px; text-transform: uppercase; font-size: 0.9rem; }
 
-        /* RANK BAR */
         .rank-container { width: 90%; max-width: 450px; background: #111; padding: 15px; border-radius: 20px; border: 1px solid #222; margin-bottom: 40px; text-align: center; }
         .rank-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px; }
         #rank-icon { font-size: 1.5rem; }
@@ -23,7 +21,7 @@
         .progress-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 10px; }
         .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.8s ease; box-shadow: 0 0 10px var(--accent); }
 
-        /* GAMES GRID */
+
         .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; width: 90%; max-width: 1100px; }
         .game-card { background: var(--panel); border: 1px solid #1a1a1a; border-radius: 20px; padding: 30px; text-align: center; transition: 0.3s; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; }
         .game-card img { width: 80px; height: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); transition: 0.3s; }
@@ -54,16 +52,21 @@
         <p>Master your mind speed.</p>
     </div>
 
-    <div class="rank-container">
-        <div class="rank-header">
-            <span id="rank-icon">🎓</span>
-            <div id="rank-name" class="rank-title">STUDENT</div>
-        </div>
-        <div class="progress-bg">
-            <div id="rank-progress" class="progress-fill"></div>
-        </div>
+<div class="rank-container">
+    <div class="rank-header">
+        <span id="rank-icon">🎓</span>
+        <div id="rank-name" class="rank-title">STUDENT</div>
+    </div>
+    
+    <div class="progress-bg">
+        <div id="rank-progress" class="progress-fill"></div>
     </div>
 
+    <div id="next-rank-info" style="color: #666; font-size: 0.8rem; margin-top: 8px; text-align: center;">
+        Next: Scholar at 500 (Current: <span id="rank-score" style="color:var(--brain)">0</span> 🧠)
+    </div>
+</div>
+    
     <div class="games-grid">
         <a href="math.html" class="game-card">
             <img src="https://cdn-icons-png.flaticon.com/512/3771/3771278.png" alt="Math">
@@ -108,17 +111,28 @@
             { name: "Overlord", min: 10000, next: 999999, icon: "🌌" }
         ];
 
-        function updateUI() {
-            document.getElementById('brains').innerText = userBrains;
-            
-            let currentRank = ranks[0];
-            for (let r of ranks) { if (userBrains >= r.min) currentRank = r; }
-            
-            document.getElementById('rank-name').innerText = currentRank.name;
-            document.getElementById('rank-icon').innerText = currentRank.icon;
-            
-            let progress = ((userBrains - currentRank.min) / (currentRank.next - currentRank.min)) * 100;
-            document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
+function updateUI() {
+
+    document.getElementById('brains').innerText = userBrains;
+    
+    document.getElementById('rank-score').innerText = userBrains;
+
+    let currentRank = ranks[0];
+    let nextRank = ranks[1];
+    
+    for (let i = 0; i < ranks.length; i++) {
+        if (userBrains >= ranks[i].min) {
+            currentRank = ranks[i];
+            nextRank = ranks[i + 1] || { name: "MAX", min: userBrains, icon: "🌌" };
+        }
+    }
+
+    document.getElementById('rank-name').innerText = currentRank.name;
+    document.getElementById('rank-icon').innerText = currentRank.icon;
+    document.getElementById('next-rank-info').innerHTML = `Next: ${nextRank.name} at ${nextRank.min} (Current: <span style="color:var(--brain)">${userBrains}</span> 🧠)`;
+
+    let progress = ((userBrains - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
+    document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
 
             const skin = colors.find(c => c.id === currentSkin);
             document.documentElement.style.setProperty('--accent', skin.hex);
