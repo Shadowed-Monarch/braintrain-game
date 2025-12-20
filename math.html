@@ -2,118 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Train</title>
     <style>
         :root { --bg: #000; --accent: #f00; --brain: #ff77ff; }
         body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
-        header { width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
-        .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
+        header { width: 100%; padding: 15px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); background: #050505; box-sizing: border-box; }
         #game-container { position: relative; width: 95%; max-width: 800px; height: 450px; background: #080808; border: 2px solid var(--accent); border-radius: 15px; margin-top: 20px; overflow: hidden; }
-        .bubble { position: absolute; background: var(--accent); padding: 12px 18px; border-radius: 25px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 0 15px var(--accent); white-space: nowrap; transition: transform 0.05s linear; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 5; }
-        #ans { padding: 15px; width: 80%; max-width: 320px; margin-top: 25px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 24px; text-align: center; outline: none; }
-        #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
-        .diff-btn { padding: 10px 20px; margin: 5px; border: 1px solid #444; background: #222; color: white; cursor: pointer; border-radius: 8px; font-weight: bold; }
-        .diff-btn.active { border-color: var(--accent); background: var(--accent); }
+        
+        /* Vehicle Styles */
+        .bubble { position: absolute; padding: 10px; border-radius: 10px; font-weight: bold; transition: transform 0.05s linear; z-index: 5; display: flex; flex-direction: column; align-items: center; }
+        .vehicle-body { font-size: 30px; margin-bottom: -10px; }
+        .q-text { background: var(--accent); padding: 5px 10px; border-radius: 5px; box-shadow: 0 0 10px var(--accent); }
+
+        #ans { padding: 15px; width: 80%; max-width: 320px; margin-top: 25px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 24px; text-align: center; }
+        #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
     </style>
 </head>
 <body>
     <header>
-        <a href="index.html" style="color:white; text-decoration:none; border:1px solid #fff; padding:5px 12px; border-radius:5px; font-weight:bold;">HOME</a>
-        <div class="brain-wrap"><img src="https://img.icons8.com/fluency/48/brain.png" style="width:22px;"> <span id="cur-brains">0</span></div>
+        <a href="index.html" style="color:white; text-decoration:none; border:1px solid #fff; padding:5px 12px; border-radius:5px;">HOME</a>
+        <div id="lvl-display">Level: 1</div>
+        <div class="brain-wrap"><span id="cur-brains">0</span> 🧠</div>
     </header>
-    <div id="game-container">
-        <div id="overlay">
-            <h2>MATH TRAIN</h2>
-            <p>Select max questions on screen:</p>
-            <div>
-                <button class="diff-btn active" onclick="setLimit(1, 0.6, this)">1</button>
-                <button class="diff-btn" onclick="setLimit(2, 0.4, this)">2</button>
-                <button class="diff-btn" onclick="setLimit(3, 0.3, this)">3</button>
-            </div>
-            <button onclick="game.start()" style="margin-top:20px; padding:12px 50px; background:var(--accent); border:none; color:white; border-radius:30px; font-weight:bold; cursor:pointer;">START</button>
-        </div>
-    </div>
+    <div id="game-container"><div id="overlay">
+        <h2 id="msg">MATH TRAIN</h2>
+        <p id="sub-msg">Solve questions before they crash!</p>
+        <button onclick="game.start()" style="padding:12px 50px; background:var(--accent); border:none; color:white; border-radius:30px; cursor:pointer;">START LEVEL</button>
+    </div></div>
     <input type="number" id="ans" placeholder="?" autocomplete="off">
 
     <script>
-        let maxB = 1, baseS = 0.6;
-        function setLimit(n, s, btn) {
-            maxB = n; baseS = s;
-            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
         class MathGame {
             constructor() {
                 this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
+                this.maxLvl = parseInt(localStorage.getItem('bt_max_level')) || 1;
+                this.lvl = parseInt(localStorage.getItem('bt_target_level')) || this.maxLvl;
                 this.skin = localStorage.getItem('bt_current_skin') || 'red';
-                this.active = []; this.isPlaying = false; this.solved = 0;
-                this.applyTheme();
-                document.getElementById('cur-brains').innerText = this.brains;
+                this.vehicle = localStorage.getItem('bt_current_vehicle') || 'box';
+                this.active = []; this.solved = 0;
+                this.init();
             }
-            applyTheme() {
-                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f'};
-                document.documentElement.style.setProperty('--accent', c[this.skin] || '#f00');
+            init() {
+                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f', orange:'#f60', pink:'#f3a'};
+                document.documentElement.style.setProperty('--accent', c[this.skin]);
+                document.getElementById('cur-brains').innerText = this.brains;
+                document.getElementById('lvl-display').innerText = "Level: " + this.lvl;
             }
             start() {
-                this.isPlaying = true; this.solved = 0; this.active = []; 
+                this.isPlaying = true; this.solved = 0; this.active = [];
                 document.getElementById('overlay').style.display = 'none';
                 document.getElementById('ans').focus();
                 this.loop();
-                this.spawnInt = setInterval(() => { 
-                    if(this.active.length < maxB && (this.solved + this.active.length < 10)) this.spawn(); 
-                }, 2000);
+                // Speed and spawn rate adjusted slightly by level
+                let speed = 0.6 + (this.lvl * 0.05);
+                this.spawnInt = setInterval(() => {
+                    if(this.active.length < 2 && this.solved < 10) this.spawn(speed);
+                }, 2500 - (this.lvl * 50));
             }
-            spawn() {
-                const a = Math.floor(Math.random()*12)+1, b = Math.floor(Math.random()*12)+1;
-                const el = document.createElement('div'); el.className = 'bubble'; el.innerText = `${a}+${b}`;
-                
-                let topPos;
-                let isTooClose;
-                let attempts = 0;
-                do {
-                    isTooClose = false;
-                    // Strict range: Container is 450px. Bubble is ~50px. 
-                    // Spawning between 50px and 350px keeps it perfectly centered.
-                    topPos = Math.floor(Math.random() * 300) + 50; 
-                    for(let b of this.active) {
-                        if(Math.abs(topPos - b.y) < 80) isTooClose = true; 
-                    }
-                    attempts++;
-                } while(isTooClose && attempts < 15);
+            spawn(speed) {
+                const ops = ['+', '-', '*', '/'];
+                const op = ops[Math.floor(Math.random() * ops.length)];
+                let a, b, ans;
+                if(op === '+') { a = rand(1, 10+this.lvl); b = rand(1, 10+this.lvl); ans = a + b; }
+                else if(op === '-') { a = rand(10, 20+this.lvl); b = rand(1, a); ans = a - b; }
+                else if(op === '*') { a = rand(1, 5+Math.floor(this.lvl/2)); b = rand(1, 10); ans = a * b; }
+                else { b = rand(1, 10); ans = rand(1, 10); a = b * ans; }
 
+                const el = document.createElement('div'); el.className = 'bubble';
+                const vIcon = this.vehicle === 'car' ? '🏎️' : (this.vehicle === 'rocket' ? '🚀' : '⬜');
+                el.innerHTML = `<div class="vehicle-body">${vIcon}</div><div class="q-text">${a}${op}${b}</div>`;
+                
+                let topPos = Math.floor(Math.random() * 250) + 50;
                 el.style.top = topPos + 'px';
                 document.getElementById('game-container').appendChild(el);
-                this.active.push({ el, x: -120, y: topPos, speed: baseS, ans: (a+b).toString() });
+                this.active.push({ el, x: -150, ans: ans.toString(), speed: speed });
             }
             loop() {
                 if(!this.isPlaying) return;
                 this.active.forEach(ent => {
                     ent.x += ent.speed;
                     ent.el.style.transform = `translateX(${ent.x}px)`;
-                    if(ent.x > 820) this.end('GAME OVER');
+                    if(ent.x > 820) this.end(false);
                 });
                 requestAnimationFrame(() => this.loop());
             }
-            end(res) {
+            end(success) {
                 this.isPlaying = false; clearInterval(this.spawnInt);
                 document.querySelectorAll('.bubble').forEach(b => b.remove());
                 document.getElementById('overlay').style.display = 'flex';
-                if(res === 'SUCCESS') { 
-                    this.brains += 20; 
-                    localStorage.setItem('bt_coins', this.brains); 
-                    document.getElementById('cur-brains').innerText = this.brains; 
+                if(success) {
+                    this.brains += (10 * this.lvl);
+                    if(this.lvl === this.maxLvl) { this.maxLvl++; localStorage.setItem('bt_max_level', this.maxLvl); }
+                    localStorage.setItem('bt_coins', this.brains);
+                    document.getElementById('msg').innerText = "LEVEL COMPLETE!";
+                    document.getElementById('sub-msg').innerText = `Gained ${10 * this.lvl} brains!`;
+                    this.init();
+                } else {
+                    document.getElementById('msg').innerText = "GAME OVER";
+                    document.getElementById('sub-msg').innerText = "Try level " + this.lvl + " again.";
                 }
             }
         }
+        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
         const game = new MathGame();
         document.getElementById('ans').addEventListener('input', (e) => {
             const i = game.active.findIndex(ent => ent.ans === e.target.value);
-            if(i !== -1) { 
-                game.active[i].el.remove(); game.active.splice(i, 1); 
-                game.solved++; e.target.value = ''; 
-                if(game.solved >= 10) game.end('SUCCESS'); 
+            if(i !== -1) {
+                game.active[i].el.remove(); game.active.splice(i, 1);
+                game.solved++; e.target.value = '';
+                if(game.solved >= 10) game.end(true);
             }
         });
     </script>
