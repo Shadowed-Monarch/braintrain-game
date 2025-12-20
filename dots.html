@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dots Training</title>
+    <style>
+        :root { --bg: #000; --accent: #ff0000; --text: #fff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        
+        header { width: 100%; padding: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; box-sizing: border-box;}
+        .back-btn { text-decoration: none; color: white; font-weight: bold; border: 1px solid white; padding: 5px 10px; border-radius: 5px; }
+        
+        #level-menu { width: 95%; max-width: 800px; height: 80vh; overflow-y: auto; margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .lvl-btn { 
+            width: 60px; height: 60px; background: #222; border: 2px solid #444; color: #fff; 
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; border-radius: 10px;
+        }
+        .lvl-btn.unlocked { border-color: var(--accent); background: #111; }
+        .lvl-btn.unlocked:hover { background: var(--accent); }
+        .lvl-btn.locked { opacity: 0.5; cursor: not-allowed; }
+
+        #game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
+        #game-container { position: relative; width: 95%; max-width: 850px; height: 500px; background: #111; border: 3px solid var(--accent); border-radius: 10px; overflow: hidden; margin-top: 20px; }
+        
+        .dot { 
+            position: absolute; width: 60px; height: 60px; 
+            background: var(--accent); color: white; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; cursor: pointer; border: 2px solid #fff; 
+            user-select: none;
+        }
+        
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        #overlay button { background: var(--bg); color: white; border: 2px solid var(--accent); padding: 12px 30px; font-size: 1.1rem; cursor: pointer; border-radius: 8px; margin: 10px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">⬅ HOME</a>
+        <div id="status-bar">Lvl: <span id="current-lvl-display">-</span> | ⏳ <span id="timer">30</span> | 🪙 <span id="coin-display">0</span></div>
+    </header>
+
+    <div id="level-menu">
+        </div>
+
+    <div id="game-ui">
+        <div id="game-container">
+            <div id="overlay" class="hidden">
+                <h2 id="title">READY?</h2>
+                <button onclick="game.startLevel()">START</button>
+                <button onclick="game.exitToMenu()" style="font-size:0.8rem; border-color:#555;">Quit to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DotGame {
+            constructor() {
+                this.maxLevel = parseInt(localStorage.getItem('bt_dots_max_lvl')) || 1;
+                this.coins = parseInt(localStorage.getItem('bt_coins')) || 0;
+                this.currentSkin = localStorage.getItem('bt_current_skin') || 'red';
+                this.activeLevel = 1;
+                this.timeLeft = 30;
+
+                this.applySkin();
+                this.renderMenu();
+                this.updateHud();
+            }
+
+            applySkin() {
+                const colors = { red:'#ff0000', blue:'#0088ff', yellow:'#ffcc00', green:'#00ff00', purple:'#9900ff', cyan:'#00ffff' };
+                if(this.currentSkin === 'rainbow') {
+                    document.documentElement.style.setProperty('--accent', 'white');
+                } else {
+                    document.documentElement.style.setProperty('--accent', colors[this.currentSkin] || '#ff0000');
+                }
+            }
+
+            renderMenu() {
+                const menu = document.getElementById('level-menu');
+                menu.innerHTML = '';
+                for(let i = 1; i <= this.maxLevel + 1; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'lvl-btn';
+                    btn.innerText = i;
+                    if(i <= this.maxLevel) {
+                        btn.classList.add('unlocked');
+                        btn.onclick = () => this.selectLevel(i);
+                    } else {
+                        btn.classList.add('locked');
+                    }
+                    menu.appendChild(btn);
+                }
+            }
+
+            selectLevel(lvl) {
+                this.activeLevel = lvl;
+                document.getElementById('level-menu').style.display = 'none';
+                document.getElementById('game-ui').style.display = 'flex';
+                document.getElementById('current-lvl-display').innerText = lvl;
+                document.getElementById('overlay').classList.remove('hidden');
+                document.getElementById('title').innerText = `LEVEL ${lvl}`;
+            }
+
+            exitToMenu() {
+                clearInterval(this.timerInterval);
+                document.getElementById('game-ui').style.display = 'none';
+                document.getElementById('level-menu').style.display = 'flex';
+                this.renderMenu();
+            }
+
+            startLevel() {
+                document.getElementById('overlay').classList.add('hidden');
+                this.timeLeft = 30;
+                this.currentDot = 1;
+                this.renderDots();
+                
+                clearInterval(this.timerInterval);
+                this.timerInterval = setInterval(() => {
+                    this.timeLeft--;
+                    document.getElementById('timer').innerText = this.timeLeft;
+                    if(this.timeLeft <= 0) this.end('FAIL');
+                }, 1000);
+            }
+
+            renderDots() {
+                const container = document.getElementById('game-container');
+                container.querySelectorAll('.dot').forEach(d => d.remove());
+                
+                // Difficulty: Level 1 = 5 dots. Level 2 = 6 dots.
+                const total = 5 + Math.floor(this.activeLevel / 1.5);
+                this.totalDots = total;
+
+                for(let i=1; i<=total; i++) {
+                    const d = document.createElement('div');
+                    d.className = 'dot'; d.innerText = i;
+                    
+                    // Random positions inside container (850x500)
+                    // Subtract 60px (dot size) to keep inside bounds
+                    d.style.left = Math.random() * (container.clientWidth - 70) + 'px';
+                    d.style.top = Math.random() * (container.clientHeight - 70) + 'px';
+                    
+                    if(this.currentSkin === 'rainbow') d.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
+
+                    d.onclick = () => {
+                        if(parseInt(d.innerText) === this.currentDot) {
+                            d.remove(); 
+                            this.currentDot++;
+                            if(this.currentDot > this.totalDots) this.end('SUCCESS');
+                        } else {
+                            this.end('FAIL');
+                        }
+                    };
+                    container.appendChild(d);
+                }
+            }
+
+            end(txt) {
+                clearInterval(this.timerInterval);
+                document.getElementById('overlay').classList.remove('hidden');
+                document.getElementById('title').innerText = txt;
+                
+                if(txt === 'SUCCESS') {
+                    if(this.activeLevel === this.maxLevel) {
+                        this.maxLevel++;
+                        localStorage.setItem('bt_dots_max_lvl', this.maxLevel);
+                    }
+                    
+                    let reward = 10;
+                    if(this.activeLevel === 1 && this.maxLevel === 2) reward = 100;
+                    if(this.activeLevel % 10 === 0) reward = 100;
+
+                    this.coins += reward;
+                    localStorage.setItem('bt_coins', this.coins);
+                    this.updateHud();
+
+                    const btn = document.querySelector('#overlay button');
+                    btn.innerText = "NEXT LEVEL";
+                    btn.onclick = () => {
+                        this.activeLevel++;
+                        this.selectLevel(this.activeLevel);
+                        setTimeout(() => this.startLevel(), 100);
+                    };
+                } else {
+                    const btn = document.querySelector('#overlay button');
+                    btn.innerText = "RETRY";
+                    btn.onclick = () => this.startLevel();
+                }
+            }
+
+            updateHud() {
+                document.getElementById('coin-display').innerText = this.coins;
+            }
+        }
+        const game = new DotGame();
+    </script>
+</body>
+</html>
