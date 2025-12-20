@@ -3,211 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Train: 100 Levels</title>
+    <title>Maths</title>
     <style>
         :root { --bg: #000; --accent: #f00; --brain: #ff77ff; }
         body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
         header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
         .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
-        
         #game-container { position: relative; width: 95%; max-width: 800px; height: 350px; background: #080808; border: 2px solid var(--accent); border-radius: 15px; margin-top: 10px; overflow: hidden; }
         .bubble { position: absolute; background: var(--accent); width: 100px; height: 55px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 0 15px var(--accent); display: flex; align-items: center; justify-content: center; color: white; transition: transform 0.1s; z-index: 5; }
-        
         #ans { padding: 15px; width: 80%; max-width: 300px; margin-top: 20px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 24px; text-align: center; outline: none; }
         #ans.correct { border-color: #0f0; box-shadow: 0 0 15px #0f0; }
-
         #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
-        
         .level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-height: 200px; overflow-y: auto; margin: 15px 0; padding: 10px; width: 100%; }
         .lvl-btn { padding: 10px; border: 2px solid #333; background: #111; color: #666; cursor: not-allowed; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
         .lvl-btn.unlocked { border-color: #555; color: #fff; cursor: pointer; }
         .lvl-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
-        
         .start-btn { padding: 15px 40px; background: var(--accent); border: none; color: white; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
     </style>
 </head>
 <body>
-
     <header>
         <a href="index.html" style="color:white; text-decoration:none; border:1px solid #fff; padding:5px 12px; border-radius:5px; font-size: 0.8rem;">HOME</a>
         <div style="font-weight: bold; color: var(--accent);">LVL <span id="display-lvl">1</span></div>
         <div class="brain-wrap"><img src="https://img.icons8.com/fluency/48/brain.png" style="width:20px;"> <span id="cur-brains">0</span></div>
     </header>
-
-    <div id="game-container">
-        <div id="overlay">
-            <h2 id="m-title" style="margin:0 0 10px 0;">SELECT LEVEL</h2>
-            <div class="level-grid" id="lvl-grid"></div>
-            <button class="start-btn" onclick="game.start()">START TRAIN</button>
-        </div>
-    </div>
-
+    <div id="game-container"><div id="overlay"><h2 id="m-title" style="margin:0 0 10px 0;">SELECT LEVEL</h2><div class="level-grid" id="lvl-grid"></div><button class="start-btn" onclick="game.start()">START TRAIN</button></div></div>
     <input type="number" id="ans" placeholder="?" autocomplete="off">
     <p style="color:#888; margin: 10px 0;">SOLVED: <span id="count" style="color:white">0</span>/10</p>
 
     <script>
         let selectedLvl = 1;
-        const totalLevels = 100;
-
         class MathGame {
             constructor() {
                 this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
                 this.unlockedLvl = parseInt(localStorage.getItem('bt_unlocked')) || 1;
                 this.isPlaying = false;
                 this.active = null;
-
-                // FIX: Apply the skin color when the game loads
-                this.applyTheme(); 
-                
+                this.applyTheme(); // Sync color
                 this.initMenu();
                 this.updateUI();
             }
-
+            applyTheme() {
+                const skinID = localStorage.getItem('bt_current_skin') || 'red';
+                const colors = { red:'#ff0000', blue:'#0088ff', yellow:'#ffcc00', green:'#00ff00', purple:'#9900ff' };
+                document.documentElement.style.setProperty('--accent', colors[skinID] || '#ff0000');
+            }
             updateUI() {
                 document.getElementById('cur-brains').innerText = this.brains;
                 document.getElementById('display-lvl').innerText = selectedLvl;
             }
-
             initMenu() {
-                const grid = document.getElementById('lvl-grid');
-                grid.innerHTML = '';
-                for (let i = 1; i <= totalLevels; i++) {
-                    const btn = document.createElement('button');
-                    btn.innerText = i;
-                    btn.className = 'lvl-btn';
+                const grid = document.getElementById('lvl-grid'); grid.innerHTML = '';
+                for (let i = 1; i <= 100; i++) {
+                    const btn = document.createElement('button'); btn.innerText = i; btn.className = 'lvl-btn';
                     if (i <= this.unlockedLvl) {
                         btn.classList.add('unlocked');
-                        btn.onclick = () => {
-                            selectedLvl = i;
-                            this.initMenu();
-                            this.updateUI();
-                        };
+                        btn.onclick = () => { selectedLvl = i; this.initMenu(); this.updateUI(); };
                     }
                     if (i === selectedLvl) btn.classList.add('active');
                     grid.appendChild(btn);
                 }
             }
-
-            applyTheme() {
-                const skin = localStorage.getItem('bt_current_skin') || 'red';
-                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f'};
-                document.documentElement.style.setProperty('--accent', c[skin] || '#f00');
-            }
-
             start() {
-                this.isPlaying = true;
-                this.solved = 0;
-                this.active = null;
+                this.isPlaying = true; this.solved = 0; this.active = null;
                 document.getElementById('overlay').style.display = 'none';
                 document.getElementById('count').innerText = "0";
-                document.getElementById('ans').value = "";
-                document.getElementById('ans').focus();
-                
+                document.getElementById('ans').value = ""; document.getElementById('ans').focus();
                 document.querySelectorAll('.bubble').forEach(b => b.remove());
-                this.spawn();
-                this.requestLoop();
+                this.spawn(); this.requestLoop();
             }
-
             spawn() {
                 if (!this.isPlaying) return;
                 if (this.solved >= 10) return this.end(true);
-
                 let a, b, q, ans;
-                
-                if (selectedLvl < 5) {
-                    a = Math.floor(Math.random() * 10) + 1;
-                    b = Math.floor(Math.random() * 10) + 1;
-                    q = `${a}+${b}`; ans = a + b;
-                } else if (selectedLvl < 15) {
-                    if (Math.random() > 0.5) {
-                        a = Math.floor(Math.random() * 20) + 5;
-                        b = Math.floor(Math.random() * 10) + 1;
-                        q = `${a}-${b}`; ans = a - b;
-                    } else {
-                        a = Math.floor(Math.random() * 15) + 5;
-                        b = Math.floor(Math.random() * 15) + 5;
-                        q = `${a}+${b}`; ans = a + b;
-                    }
-                } else {
-                    let mode = Math.random();
-                    if (mode < 0.33) {
-                        a = Math.floor(Math.random() * 30) + 10;
-                        b = Math.floor(Math.random() * 20) + 5;
-                        q = `${a}+${b}`; ans = a + b;
-                    } else if (mode < 0.66) {
-                        a = Math.floor(Math.random() * 30) + 10;
-                        b = Math.floor(Math.random() * 15) + 1;
-                        q = `${a}-${b}`; ans = a - b;
-                    } else {
-                        a = Math.floor(Math.random() * 10) + 2;
-                        b = Math.floor(Math.random() * 5) + 2;
-                        q = `${a}×${b}`; ans = a * b;
-                    }
-                }
-
-                const el = document.createElement('div');
-                el.className = 'bubble';
-                el.innerText = q;
-                el.style.top = (Math.random() * 240 + 30) + "px";
-                el.style.left = "-110px";
+                if (selectedLvl < 5) { a = Math.floor(Math.random() * 10) + 1; b = Math.floor(Math.random() * 10) + 1; q = `${a}+${b}`; ans = a + b; }
+                else if (selectedLvl < 15) { if (Math.random() > 0.5) { a = Math.floor(Math.random() * 20) + 5; b = Math.floor(Math.random() * 10) + 1; q = `${a}-${b}`; ans = a - b; } else { a = Math.floor(Math.random() * 15) + 5; b = Math.floor(Math.random() * 15) + 5; q = `${a}+${b}`; ans = a + b; } }
+                else { let mode = Math.random(); if (mode < 0.33) { a = Math.floor(Math.random() * 30) + 10; b = Math.floor(Math.random() * 20) + 5; q = `${a}+${b}`; ans = a + b; } else if (mode < 0.66) { a = Math.floor(Math.random() * 30) + 10; b = Math.floor(Math.random() * 15) + 1; q = `${a}-${b}`; ans = a - b; } else { a = Math.floor(Math.random() * 10) + 2; b = Math.floor(Math.random() * 5) + 2; q = `${a}×${b}`; ans = a * b; } }
+                const el = document.createElement('div'); el.className = 'bubble'; el.innerText = q;
+                el.style.top = (Math.random() * 240 + 30) + "px"; el.style.left = "-110px";
                 document.getElementById('game-container').appendChild(el);
-                
                 const speed = 0.6 + (selectedLvl * 0.05);
                 this.active = { el, x: -110, s: speed, ans: ans.toString() };
             }
-
             requestLoop() {
                 if(!this.isPlaying) return;
                 if(this.active) {
-                    this.active.x += this.active.s;
-                    this.active.el.style.left = this.active.x + "px";
-                    const limit = document.getElementById('game-container').offsetWidth;
-                    if(this.active.x > limit) return this.end(false);
+                    this.active.x += this.active.s; this.active.el.style.left = this.active.x + "px";
+                    if(this.active.x > document.getElementById('game-container').offsetWidth) return this.end(false);
                 }
                 requestAnimationFrame(() => this.requestLoop());
             }
-
             end(win) {
-                this.isPlaying = false;
-                if(this.active) this.active.el.remove();
-                this.active = null;
-                
+                this.isPlaying = false; if(this.active) this.active.el.remove(); this.active = null;
                 document.getElementById('overlay').style.display = 'flex';
-                const t = document.getElementById('m-title');
-                
                 if(win) {
-                    t.innerText = "LEVEL CLEAR!";
+                    document.getElementById('m-title').innerText = "LEVEL CLEAR!";
                     this.brains += (selectedLvl * 10);
-                    if (selectedLvl === this.unlockedLvl && selectedLvl < totalLevels) {
-                        this.unlockedLvl++;
-                        localStorage.setItem('bt_unlocked', this.unlockedLvl);
-                    }
-                    localStorage.setItem('bt_coins', this.brains);
-                    this.initMenu();
-                    this.updateUI();
-                } else {
-                    t.innerText = "GAME OVER";
-                }
+                    if (selectedLvl === this.unlockedLvl) { this.unlockedLvl++; localStorage.setItem('bt_unlocked', this.unlockedLvl); }
+                    localStorage.setItem('bt_coins', this.brains); this.initMenu(); this.updateUI();
+                } else { document.getElementById('m-title').innerText = "GAME OVER"; }
             }
         }
-
         const game = new MathGame();
-        const input = document.getElementById('ans');
-
-        input.addEventListener('input', (e) => {
+        document.getElementById('ans').addEventListener('input', (e) => {
             if(game.isPlaying && game.active && e.target.value === game.active.ans) {
-                const bubble = game.active.el;
-                game.active = null;
-                game.solved++;
+                const bubble = game.active.el; game.active = null; game.solved++;
                 document.getElementById('count').innerText = game.solved;
-                input.classList.add('correct');
+                document.getElementById('ans').classList.add('correct');
                 bubble.style.transform = "scale(0)";
-                setTimeout(() => {
-                    bubble.remove();
-                    input.classList.remove('correct');
-                    input.value = "";
-                    game.spawn();
-                }, 100);
+                setTimeout(() => { bubble.remove(); document.getElementById('ans').classList.remove('correct'); document.getElementById('ans').value = ""; game.spawn(); }, 100);
             }
         });
     </script>
