@@ -6,196 +6,96 @@
     <title>Math Train</title>
     <style>
         :root { --bg: #000; --accent: #f00; --brain: #ff77ff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
         header { width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
         .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
-        
         #game-container { position: relative; width: 95%; max-width: 800px; height: 400px; background: #080808; border: 2px solid var(--accent); border-radius: 15px; margin-top: 20px; overflow: hidden; }
-        
-        /* Bubble size and shape fixed to stay inside box */
-        .bubble { 
-            position: absolute; 
-            background: var(--accent); 
-            width: 110px; 
-            height: 60px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 1.4rem; 
-            box-shadow: 0 0 20px var(--accent); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 5;
-            color: white;
-        }
-
+        .bubble { position: absolute; background: var(--accent); width: 110px; height: 60px; border-radius: 50px; font-weight: bold; font-size: 1.4rem; box-shadow: 0 0 20px var(--accent); display: flex; align-items: center; justify-content: center; color: white; }
         #ans { padding: 15px; width: 80%; max-width: 320px; margin-top: 25px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 24px; text-align: center; outline: none; }
-        
-        #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
-        
-        .lvl-btn { padding: 12px 35px; margin: 10px; border: 2px solid #444; background: #222; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; font-size: 1.1rem; transition: 0.3s; }
-        .lvl-btn.active { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        
-        .progress-ui { margin-top: 15px; color: #888; font-weight: bold; font-size: 1.1rem; }
+        #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        .lvl-btn { padding: 12px 30px; margin: 10px; border: 2px solid #444; background: #222; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; }
+        .lvl-btn.active { border-color: var(--accent); background: var(--accent); }
     </style>
 </head>
 <body>
     <header>
         <a href="index.html" style="color:white; text-decoration:none; border:1px solid #fff; padding:5px 12px; border-radius:5px; font-weight:bold;">HOME</a>
-        <div class="brain-wrap">
-            <img src="https://img.icons8.com/fluency/48/brain.png" style="width:22px;"> 
-            <span id="cur-brains">0</span>
-        </div>
+        <div class="brain-wrap"><img src="https://img.icons8.com/fluency/48/brain.png" style="width:22px;"> <span id="cur-brains">0</span></div>
     </header>
-
     <div id="game-container">
         <div id="overlay">
-            <h2 id="main-title" style="letter-spacing: 2px;">MATH TRAIN</h2>
-            <p>Select Your Level:</p>
-            <div style="margin-bottom: 10px;">
-                <button class="lvl-btn active" id="btn-l1" onclick="setLevel(1)">LEVEL 1</button>
-                <button class="lvl-btn" id="btn-l2" onclick="setLevel(2)">LEVEL 2</button>
+            <h2 id="m-title">MATH TRAIN</h2>
+            <div style="margin-bottom:15px;">
+                <button class="lvl-btn active" id="l1" onclick="selLvl(1)">LEVEL 1</button>
+                <button class="lvl-btn" id="l2" onclick="selLvl(2)">LEVEL 2</button>
             </div>
-            <button onclick="game.start()" style="margin-top:15px; padding:15px 60px; background:var(--accent); border:none; color:white; border-radius:30px; font-weight:bold; cursor:pointer; font-size: 1.2rem;">START GAME</button>
+            <button onclick="game.start()" style="padding:15px 50px; background:var(--accent); border:none; color:white; border-radius:30px; font-weight:bold; cursor:pointer;">START</button>
         </div>
     </div>
-
     <input type="number" id="ans" placeholder="?" autocomplete="off">
-    <div class="progress-ui">SOLVED: <span id="level-count">0</span> / 10</div>
+    <p style="color:#888;">SOLVED: <span id="count">0</span>/10</p>
 
     <script>
-        let selectedLevel = 1;
-
-        function setLevel(lvl) {
-            selectedLevel = lvl;
-            document.getElementById('btn-l1').classList.toggle('active', lvl === 1);
-            document.getElementById('btn-l2').classList.toggle('active', lvl === 2);
-        }
+        let lvl = 1;
+        function selLvl(n){ lvl=n; document.getElementById('l1').className=n==1?'lvl-btn active':'lvl-btn'; document.getElementById('l2').className=n==2?'lvl-btn active':'lvl-btn'; }
 
         class MathGame {
             constructor() {
                 this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
                 this.skin = localStorage.getItem('bt_current_skin') || 'red';
-                this.active = null; 
-                this.isPlaying = false; 
-                this.solved = 0;
                 this.applyTheme();
                 document.getElementById('cur-brains').innerText = this.brains;
             }
-
             applyTheme() {
-                const colors = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f'};
-                document.documentElement.style.setProperty('--accent', colors[this.skin] || '#f00');
+                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f'};
+                document.documentElement.style.setProperty('--accent', c[this.skin] || '#f00');
             }
-
             start() {
-                this.isPlaying = true; 
-                this.solved = 0; 
-                this.active = null;
-                document.getElementById('level-count').innerText = "0";
+                this.isPlaying = true; this.solved = 0; this.active = null;
                 document.getElementById('overlay').style.display = 'none';
-                document.getElementById('ans').value = '';
-                document.getElementById('ans').focus();
-                this.spawn();
-                this.loop();
+                document.getElementById('count').innerText = "0";
+                document.getElementById('ans').value = ""; document.getElementById('ans').focus();
+                this.spawn(); this.loop();
             }
-
             spawn() {
-                if (this.solved >= 10) return this.end('SUCCESS');
-
-                let a, b, question, answer;
-                
-                if (selectedLevel === 1) {
-                    // Level 1: Addition only
-                    a = Math.floor(Math.random() * 10) + 1;
-                    b = Math.floor(Math.random() * 10) + 1;
-                    question = `${a}+${b}`;
-                    answer = a + b;
-                } else {
-                    // Level 2: Subtraction and Multiplication
-                    const type = Math.random() > 0.5 ? 'sub' : 'mult';
-                    if (type === 'sub') {
-                        a = Math.floor(Math.random() * 15) + 10;
-                        b = Math.floor(Math.random() * 9) + 1;
-                        question = `${a}-${b}`;
-                        answer = a - b;
-                    } else {
-                        a = Math.floor(Math.random() * 8) + 2;
-                        b = Math.floor(Math.random() * 5) + 2;
-                        question = `${a}×${b}`;
-                        answer = a * b;
-                    }
+                if (this.solved >= 10) return this.end(true);
+                let a, b, q, ans;
+                if(lvl==1) { a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*10)+1; q=`${a}+${b}`; ans=a+b; }
+                else { 
+                    let mode = Math.random();
+                    if(mode > 0.5) { a=Math.floor(Math.random()*20)+10; b=Math.floor(Math.random()*10)+1; q=`${a}-${b}`; ans=a-b; }
+                    else { a=Math.floor(Math.random()*10)+2; b=Math.floor(Math.random()*5)+2; q=`${a}×${b}`; ans=a*b; }
                 }
-
-                const el = document.createElement('div');
-                el.className = 'bubble';
-                el.innerText = question;
-
-                // Set Y position strictly inside box height (400px - 60px bubble = 340px)
-                // We use 50px to 290px to be super safe.
-                const topPos = Math.floor(Math.random() * 240) + 50;
-                el.style.top = topPos + 'px';
-                el.style.left = "-120px";
-                
+                const el = document.createElement('div'); el.className = 'bubble'; el.innerText = q;
+                const top = Math.floor(Math.random()*280)+40; // Spawns safely between 40px and 320px
+                el.style.top = top + "px"; el.style.left = "-120px";
                 document.getElementById('game-container').appendChild(el);
-                
-                // Speed: 0.7 for Level 1, 0.9 for Level 2 (Adjustable)
-                this.active = { el, x: -120, speed: selectedLevel === 1 ? 0.7 : 0.9, ans: answer.toString() };
+                this.active = { el, x: -120, s: lvl==1?0.8:1.2, ans: ans.toString() };
             }
-
             loop() {
-                if (!this.isPlaying || !this.active) return;
-
-                this.active.x += this.active.speed;
+                if(!this.isPlaying || !this.active) return;
+                this.active.x += this.active.s;
                 this.active.el.style.left = this.active.x + "px";
-
-                // If bubble hits the end of the box (800px width)
-                if (this.active.x > 800) {
-                    this.end('FAIL');
-                } else {
-                    requestAnimationFrame(() => this.loop());
-                }
+                if(this.active.x > 800) this.end(false);
+                else requestAnimationFrame(()=>this.loop());
             }
-
-            end(result) {
-                this.isPlaying = false;
-                if (this.active) {
-                    this.active.el.remove();
-                    this.active = null;
-                }
-                
-                const overlay = document.getElementById('overlay');
-                overlay.style.display = 'flex';
-                const title = document.getElementById('main-title');
-
-                if (result === 'SUCCESS') {
-                    const reward = selectedLevel * 25;
-                    this.brains += reward;
+            end(win) {
+                this.isPlaying = false; if(this.active) this.active.el.remove();
+                document.getElementById('overlay').style.display = 'flex';
+                const t = document.getElementById('m-title');
+                if(win) { 
+                    t.innerText = "LEVEL CLEAR!"; this.brains += (lvl*20); 
                     localStorage.setItem('bt_coins', this.brains);
                     document.getElementById('cur-brains').innerText = this.brains;
-                    title.innerText = "LEVEL CLEAR!";
-                    title.style.color = "#0f0";
-                } else {
-                    title.innerText = "GAME OVER";
-                    title.style.color = "#f00";
-                }
+                } else { t.innerText = "GAME OVER"; }
             }
         }
-
         const game = new MathGame();
-
-        document.getElementById('ans').addEventListener('input', (e) => {
-            if (game.active && e.target.value === game.active.ans) {
-                game.active.el.remove();
-                game.active = null;
-                game.solved++;
-                document.getElementById('level-count').innerText = game.solved;
-                e.target.value = '';
-                
-                // Small pause before spawning next single question
-                setTimeout(() => {
-                    if (game.isPlaying) game.spawn();
-                }, 400);
+        document.getElementById('ans').addEventListener('input', (e)=>{
+            if(game.active && e.target.value === game.active.ans) {
+                game.active.el.remove(); game.active = null; game.solved++;
+                document.getElementById('count').innerText = game.solved;
+                e.target.value = ""; setTimeout(()=>game.spawn(), 300);
             }
         });
     </script>
