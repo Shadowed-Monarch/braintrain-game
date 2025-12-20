@@ -2,115 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grammar Speed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Train</title>
     <style>
-        :root { --bg: #000; --accent: #f00; --text: #fff; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
-        header { width: 100%; padding: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); box-sizing: border-box; align-items: center; }
-        .back-btn { text-decoration: none; color: #fff; border: 1px solid #fff; padding: 5px 10px; border-radius: 5px; }
-        #level-menu { width: 95%; max-width: 600px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; overflow-y: auto; height: 80vh; }
-        .lvl-btn { width: 50px; height: 50px; border-radius: 10px; border: 2px solid #444; background: #111; color: #fff; cursor: pointer; font-weight: bold; }
-        .lvl-btn.unlocked { border-color: var(--accent); }
-        #game-area { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
-        #game-container { position: relative; width: 95%; max-width: 800px; height: 400px; background: #080808; border: 2px solid var(--accent); border-radius: 10px; margin-top: 20px; overflow: hidden; }
-        .bubble { position: absolute; background: var(--accent); padding: 10px 15px; border-radius: 20px; font-weight: bold; white-space: nowrap; }
-        #ans { padding: 15px; width: 80%; max-width: 300px; margin-top: 20px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 10px; font-size: 20px; text-align: center; }
-        #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        #overlay button { padding: 10px 30px; background: var(--accent); border: none; color: #fff; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        :root { --bg: #000; --accent: #f00; --brain: #ff77ff; }
+        body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        header { width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
+        .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
+        #game-container { position: relative; width: 95%; max-width: 800px; height: 450px; background: #080808; border: 2px solid var(--accent); border-radius: 15px; margin-top: 20px; overflow: hidden; }
+        .bubble { position: absolute; background: var(--accent); padding: 12px 20px; border-radius: 25px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 0 15px var(--accent); white-space: nowrap; }
+        #ans { padding: 15px; width: 80%; max-width: 320px; margin-top: 25px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 22px; text-align: center; outline: none; }
+        #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+        .diff-btn { padding: 10px 20px; margin: 5px; border: 1px solid #444; background: #222; color: white; cursor: pointer; border-radius: 8px; }
+        .diff-btn.active { border-color: var(--accent); background: var(--accent); }
     </style>
 </head>
 <body>
     <header>
-        <a href="index.html" class="back-btn">⬅ HUB</a>
-        <div>Lvl: <span id="cur-lvl">-</span> | 🪙 <span id="cur-coins">0</span></div>
+        <a href="index.html" style="color:white; text-decoration:none; border:1px solid #fff; padding:5px 12px; border-radius:5px;">HOME</a>
+        <div class="brain-wrap"><img src="https://img.icons8.com/fluency/48/brain.png" style="width:22px;"> <span id="cur-brains">0</span></div>
     </header>
-    <div id="level-menu"></div>
-    <div id="game-area">
-        <div id="game-container">
-            <div id="overlay">
-                <h2 id="title">LEVEL 1</h2>
-                <button onclick="game.start()">START</button>
+
+    <div id="game-container">
+        <div id="overlay">
+            <h2 id="title">GRAMMAR TRAIN</h2>
+            <p>Type the opposite word!<br>Select max questions on screen:</p>
+            <div>
+                <button class="diff-btn active" onclick="setLimit(1, this)">1</button>
+                <button class="diff-btn" onclick="setLimit(2, this)">2</button>
+                <button class="diff-btn" onclick="setLimit(3, this)">3</button>
             </div>
+            <button onclick="game.start()" style="margin-top:20px; padding:12px 50px; background:var(--accent); border:none; color:white; border-radius:30px; font-weight:bold; cursor:pointer;">START</button>
         </div>
-        <input type="text" id="ans" placeholder="Type here..." autocomplete="off">
     </div>
+    <input type="text" id="ans" placeholder="Type opposite..." autocomplete="off">
 
     <script>
+        let maxBubbles = 1;
+        function setLimit(n, btn) {
+            maxBubbles = n;
+            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
         class GrammarGame {
             constructor() {
-                this.max = parseInt(localStorage.getItem('bt_grammar_max_lvl')) || 1;
-                this.coins = parseInt(localStorage.getItem('bt_coins')) || 0;
+                this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
                 this.skin = localStorage.getItem('bt_current_skin') || 'red';
-                this.bank = [{q:"Hot?",a:["cold"]},{q:"Fast?",a:["slow"]},{q:"Big?",a:["small"]},{q:"Sky?",a:["blue"]},{q:"Grass?",a:["green"]}];
-                this.active = []; this.isPlaying = false; this.count = 0;
-                this.applyTheme(); this.renderMenu();
-                document.getElementById('cur-coins').innerText = this.coins;
+                this.words = [
+                    {q:"HOT", a:"cold"}, {q:"FAST", a:"slow"}, {q:"BIG", a:"small"},
+                    {q:"UP", a:"down"}, {q:"HAPPY", a:"sad"}, {q:"DAY", a:"night"},
+                    {q:"BLACK", a:"white"}, {q:"YES", a:"no"}, {q:"RICH", a:"poor"}
+                ];
+                this.active = []; this.isPlaying = false; this.solved = 0;
+                this.timeBonusSpeed = 0;
+                this.applyTheme();
+                document.getElementById('cur-brains').innerText = this.brains;
             }
             applyTheme() {
-                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f', cyan:'#0ff'};
+                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f'};
                 document.documentElement.style.setProperty('--accent', c[this.skin] || '#fff');
             }
-            renderMenu() {
-                const m = document.getElementById('level-menu'); m.innerHTML = '';
-                for(let i=1; i<=this.max+1; i++) {
-                    const b = document.createElement('button'); b.className = 'lvl-btn'; b.innerText = i;
-                    if(i <= this.max) { b.classList.add('unlocked'); b.onclick = () => this.select(i); }
-                    else b.classList.add('locked'); m.appendChild(b);
-                }
-            }
-            select(l) {
-                this.lvl = l; document.getElementById('level-menu').style.display = 'none';
-                document.getElementById('game-area').style.display = 'flex';
-                document.getElementById('cur-lvl').innerText = l;
-                document.getElementById('title').innerText = "LEVEL " + l;
-            }
             start() {
-                this.isPlaying = true; this.count = 0; this.active = [];
+                this.isPlaying = true; this.solved = 0; this.active = []; this.timeBonusSpeed = 0;
                 document.getElementById('overlay').style.display = 'none';
-                document.getElementById('ans').focus(); document.getElementById('ans').value = '';
+                document.getElementById('ans').value = ''; document.getElementById('ans').focus();
+                this.speedInt = setInterval(() => { this.timeBonusSpeed += 0.2; }, 3000);
                 this.loop();
-                this.spawnInt = setInterval(() => { if(this.active.length + this.count < 10) this.spawn(); }, 2000);
+                this.spawnInt = setInterval(() => {
+                    if(this.active.length < maxBubbles && (this.solved + this.active.length < 10)) this.spawn();
+                }, 1000);
             }
             spawn() {
-                const item = this.bank[Math.floor(Math.random()*this.bank.length)];
+                const item = this.words[Math.floor(Math.random()*this.words.length)];
                 const el = document.createElement('div'); el.className = 'bubble'; el.innerText = item.q;
-                el.style.top = (Math.random()*300+20)+'px'; document.getElementById('game-container').appendChild(el);
-                this.active.push({ el, x: -100, speed: 0.6 + (this.lvl*0.15), a: item.a });
+                el.style.top = (Math.random()*350+20)+'px';
+                document.getElementById('game-container').appendChild(el);
+                this.active.push({ el, x: -120, baseSpeed: 0.9, ans: item.a });
             }
             loop() {
                 if(!this.isPlaying) return;
                 this.active.forEach(ent => {
-                    ent.x += ent.speed; ent.el.style.transform = `translateX(${ent.x}px)`;
+                    ent.x += (ent.baseSpeed + this.timeBonusSpeed);
+                    ent.el.style.transform = `translateX(${ent.x}px)`;
                     if(ent.x > 800) this.end('FAIL');
                 });
                 requestAnimationFrame(() => this.loop());
             }
             end(res) {
-                this.isPlaying = false; clearInterval(this.spawnInt);
-                const o = document.getElementById('overlay'); o.style.display = 'flex';
+                this.isPlaying = false; clearInterval(this.spawnInt); clearInterval(this.speedInt);
+                document.getElementById('overlay').style.display = 'flex';
                 document.getElementById('title').innerText = res;
                 if(res === 'SUCCESS') {
-                    if(this.lvl === this.max) { this.max++; localStorage.setItem('bt_grammar_max_lvl', this.max); }
-                    let reward = (this.lvl === 1 && this.max === 2) || this.lvl % 10 === 0 ? 100 : 10;
-                    this.coins += reward; localStorage.setItem('bt_coins', this.coins);
-                    document.getElementById('cur-coins').innerText = this.coins;
-                    o.querySelector('button').innerText = "NEXT LEVEL";
-                    o.querySelector('button').onclick = () => { this.select(this.lvl+1); this.start(); };
-                } else {
-                    o.querySelector('button').innerText = "RETRY";
-                    o.querySelector('button').onclick = () => this.start();
+                    this.brains += 25; localStorage.setItem('bt_coins', this.brains);
+                    document.getElementById('cur-brains').innerText = this.brains;
                 }
+                this.active.forEach(ent => ent.el.remove());
             }
         }
         const game = new GrammarGame();
         document.getElementById('ans').addEventListener('input', (e) => {
-            const v = e.target.value.toLowerCase().trim();
-            const i = game.active.findIndex(ent => ent.a.includes(v));
+            const val = e.target.value.toLowerCase().trim();
+            const i = game.active.findIndex(ent => ent.ans === val);
             if(i !== -1) {
                 game.active[i].el.remove(); game.active.splice(i, 1);
-                game.count++; e.target.value = '';
-                if(game.count >= 10) game.end('SUCCESS');
+                game.solved++; e.target.value = '';
+                if(game.solved >= 10) game.end('SUCCESS');
             }
         });
     </script>
