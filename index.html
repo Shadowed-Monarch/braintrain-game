@@ -8,49 +8,59 @@
         :root { --bg: #000; --panel: #0a0a0a; --text: #fff; --accent: #ff0000; --brain: #ff77ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         header { width: 100%; max-width: 1100px; padding: 30px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .brain-display { background: rgba(255, 119, 255, 0.1); padding: 8px 18px; border-radius: 12px; color: var(--brain); font-weight: bold; border: 2px solid var(--brain); display: flex; align-items: center; gap: 10px; }
-        .hero { text-align: center; padding: 60px 20px; }
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; width: 90%; max-width: 1100px; margin-bottom: 50px; }
-        .game-card { background: var(--panel); border: 2px solid var(--accent); border-radius: 20px; padding: 40px 20px; text-align: center; text-decoration: none; color: white; transition: 0.3s; }
-        .game-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px var(--accent); }
-        .shop-btn { background: #222; color: white; border: 1px solid #444; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-top: 20px; }
-        #shop-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        .shop-grid { display: grid; grid-template-columns: repeat(3, 80px); gap: 15px; margin-top: 20px; }
-        .shop-item { width: 80px; height: 80px; border-radius: 15px; cursor: pointer; border: 2px solid transparent; }
+        .brain-display { background: rgba(255, 119, 255, 0.1); padding: 8px 18px; border-radius: 12px; color: var(--brain); font-weight: bold; border: 2px solid var(--brain); display: flex; align-items: center; gap: 10px; box-shadow: 0 0 15px rgba(255, 119, 255, 0.2); }
+        .brain-img { width: 24px; height: 24px; }
+        .settings-btn { font-size: 2rem; cursor: pointer; background: none; border: none; color: white; transition: 0.3s; }
+        .hero { text-align: center; padding: 40px 20px; }
+        .hero h1 { font-size: 3.5rem; margin: 0; text-shadow: 0 0 20px var(--accent); letter-spacing: 4px; }
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; width: 90%; max-width: 1100px; margin: 40px 0; }
+        .game-card { background: var(--panel); border: 2px solid var(--accent); border-radius: 20px; padding: 50px 20px; text-align: center; text-decoration: none; color: white; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .game-card:hover { transform: translateY(-10px); box-shadow: 0 0 30px var(--accent); }
+        .game-card img { width: 100px; height: 100px; margin-bottom: 20px; object-fit: contain; }
+        #settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .shop-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 30px; }
+        .shop-item { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #333; cursor: pointer; }
     </style>
 </head>
 <body>
     <header>
-        <div style="font-size: 1.5rem; font-weight: 900; letter-spacing: 2px;">BRAIN TRAIN</div>
-        <div class="brain-display">🧠 <span id="brains">0</span></div>
+        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+        <div class="brain-display">
+            <img src="https://img.icons8.com/fluency/48/brain.png" class="brain-img">
+            <span id="brains">0</span>
+        </div>
     </header>
-
-    <div class="hero">
-        <h1>TRAIN YOUR BRAIN</h1>
-        <button class="shop-btn" onclick="toggleShop()">🛒 COLOR SHOP</button>
-    </div>
-
+    <div class="hero"><h1>BRAIN TRAIN</h1><p>Master your mind speed.</p></div>
     <div class="games-grid">
-        <a href="math.html" class="game-card"><h2>MATH</h2><p>Addition & Speed</p></a>
-        <a href="grammar.html" class="game-card"><h2>GRAMMAR</h2><p>Opposites</p></a>
-        <a href="dots.html" class="game-card"><h2>DOTS</h2><p>Reflex Test</p></a>
+        <a href="math.html" class="game-card">
+            <img src="https://cdn-icons-png.flaticon.com/512/3771/3771278.png" alt="Math">
+            <h3>MATH</h3>
+        </a>
+        <a href="grammar.html" class="game-card">
+            <img src="https://cdn-icons-png.flaticon.com/512/3850/3850285.png" alt="Grammar">
+            <h3>GRAMMAR</h3>
+        </a>
+        <a href="dots.html" class="game-card">
+            <img src="https://cdn-icons-png.flaticon.com/512/3306/3306631.png" alt="Dots">
+            <h3>DOTS</h3>
+        </a>
     </div>
-
-    <div id="shop-overlay">
-        <h2>SELECT THEME</h2>
+    <div id="settings-overlay">
+        <h2>THEME SHOP</h2>
         <div class="shop-grid" id="shop-grid"></div>
-        <button onclick="toggleShop()" style="margin-top:30px; padding:10px 30px;">CLOSE</button>
+        <button onclick="toggleSettings()" style="padding:15px 50px; background:var(--accent); border:none; color:white; border-radius:30px; cursor:pointer; font-weight:bold;">CLOSE</button>
     </div>
-
     <script>
-        let userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
-        let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red'];
-        let currentSkin = localStorage.getItem('bt_current_skin') || 'red';
-
         const colors = [
-            {id:'red', hex:'#ff0000', cost:0}, {id:'blue', hex:'#0088ff', cost:100},
-            {id:'green', hex:'#00ff00', cost:200}, {id:'purple', hex:'#9900ff', cost:300}
+            { id: 'red', hex: '#ff0000', cost: 0 },
+            { id: 'blue', hex: '#0088ff', cost: 0 },
+            { id: 'yellow', hex: '#ffcc00', cost: 0 },
+            { id: 'green', hex: '#00ff00', cost: 200 },
+            { id: 'purple', hex: '#9900ff', cost: 200 }
         ];
+        let userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
+        let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red', 'blue', 'yellow'];
+        let currentSkin = localStorage.getItem('bt_current_skin') || 'red';
 
         function updateUI() {
             document.getElementById('brains').innerText = userBrains;
@@ -58,33 +68,22 @@
             document.documentElement.style.setProperty('--accent', skin.hex);
             renderShop();
         }
-
         function renderShop() {
             const grid = document.getElementById('shop-grid'); grid.innerHTML = '';
             colors.forEach(c => {
                 const el = document.createElement('div');
                 el.className = 'shop-item'; el.style.background = c.hex;
-                if(currentSkin === c.id) el.style.borderColor = "white";
-                el.onclick = () => {
-                    if(!unlocked.includes(c.id)) {
-                        if(userBrains >= c.cost) {
-                            userBrains -= c.cost; unlocked.push(c.id);
-                            localStorage.setItem('bt_coins', userBrains);
-                            localStorage.setItem('bt_skins', JSON.stringify(unlocked));
-                        }
-                    } else {
-                        currentSkin = c.id; localStorage.setItem('bt_current_skin', c.id);
-                    }
-                    updateUI();
-                };
+                if(!unlocked.includes(c.id)) {
+                    el.innerHTML = `<span style="color:#000; font-size:12px; display:flex; justify-content:center; align-items:center; height:100%; font-weight:bold;">${c.cost}</span>`;
+                    el.onclick = () => { if(userBrains >= c.cost) { userBrains -= c.cost; unlocked.push(c.id); localStorage.setItem('bt_coins', userBrains); localStorage.setItem('bt_skins', JSON.stringify(unlocked)); updateUI(); } };
+                } else {
+                    if(currentSkin === c.id) el.style.boxShadow = "0 0 20px white";
+                    el.onclick = () => { currentSkin = c.id; localStorage.setItem('bt_current_skin', c.id); updateUI(); };
+                }
                 grid.appendChild(el);
             });
         }
-
-        function toggleShop() {
-            const s = document.getElementById('shop-overlay');
-            s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
-        }
+        function toggleSettings() { const s = document.getElementById('settings-overlay'); s.style.display = (s.style.display === 'flex') ? 'none' : 'flex'; }
         updateUI();
     </script>
 </body>
