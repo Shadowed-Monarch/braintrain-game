@@ -7,83 +7,155 @@
     <style>
         :root { --bg: #000; --panel: #0a0a0a; --text: #fff; --accent: #ff0000; --brain: #ff77ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        header { width: 100%; max-width: 1100px; padding: 30px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .brain-display { background: rgba(255, 119, 255, 0.1); padding: 8px 18px; border-radius: 12px; color: var(--brain); font-weight: bold; border: 2px solid var(--brain); display: flex; align-items: center; gap: 10px; box-shadow: 0 0 15px rgba(255, 119, 255, 0.2); }
-        .brain-img { width: 24px; height: 24px; }
-        .settings-btn { font-size: 2rem; cursor: pointer; background: none; border: none; color: white; transition: 0.3s; }
-        .hero { text-align: center; padding: 40px 20px; }
-        .hero h1 { font-size: 3.5rem; margin: 0; text-shadow: 0 0 20px var(--accent); letter-spacing: 4px; }
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; width: 90%; max-width: 1100px; margin: 40px 0; }
-        .game-card { background: var(--panel); border: 2px solid var(--accent); border-radius: 20px; padding: 50px 20px; text-align: center; text-decoration: none; color: white; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .game-card:hover { transform: translateY(-10px); box-shadow: 0 0 30px var(--accent); }
-        .game-card img { width: 100px; height: 100px; margin-bottom: 20px; object-fit: contain; }
-        #settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .shop-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 30px; }
-        .shop-item { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #333; cursor: pointer; }
+        
+        header { width: 100%; max-width: 1100px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        
+        /* Rank Progress Bar */
+        .rank-container { width: 100%; max-width: 400px; background: #111; padding: 15px; border-radius: 15px; border: 1px solid #222; margin-bottom: 20px; text-align: center; }
+        .rank-title { font-weight: bold; color: var(--accent); font-size: 1.2rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .progress-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px var(--accent); }
+        .next-rank { font-size: 0.8rem; color: #666; margin-top: 5px; }
+
+        .brain-display { background: rgba(255, 119, 255, 0.1); padding: 8px 18px; border-radius: 12px; color: var(--brain); font-weight: bold; border: 2px solid var(--brain); display: flex; align-items: center; gap: 10px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 90%; max-width: 1100px; padding: 20px; }
+        .card { background: var(--panel); border: 2px solid #1a1a1a; border-radius: 20px; padding: 25px; text-align: center; transition: 0.3s; text-decoration: none; color: white; }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        
+        .btn { display: inline-block; margin-top: 15px; padding: 10px 25px; background: var(--accent); color: white; border-radius: 25px; font-weight: bold; text-decoration: none; }
+        
+        #shop-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .shop-item { width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
     </style>
 </head>
 <body>
+
     <header>
-        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+        <div style="font-size: 1.5rem; font-weight: bold;">BRAIN<span style="color:var(--accent)">TRAIN</span></div>
         <div class="brain-display">
-            <img src="https://img.icons8.com/fluency/48/brain.png" class="brain-img">
+            <img src="https://img.icons8.com/fluency/48/brain.png" style="width:24px;">
             <span id="brains">0</span>
         </div>
     </header>
-    <div class="hero"><h1>BRAIN TRAIN</h1><p>Master your mind speed.</p></div>
-    <div class="games-grid">
-        <a href="math.html" class="game-card">
-            <img src="https://cdn-icons-png.flaticon.com/512/3771/3771278.png" alt="Math">
-            <h3>MATH</h3>
+
+    <div class="rank-container">
+        <div id="rank-name" class="rank-title">STUDENT</div>
+        <div class="progress-bg">
+            <div id="rank-progress" class="progress-fill"></div>
+        </div>
+        <div id="next-rank-info" class="next-rank">Next: Scholar at 500</div>
+    </div>
+
+    <div class="grid">
+        <a href="math.html" class="card">
+            <h2 style="color:var(--accent)">Math Train</h2>
+            <p>Solve equations to keep the train moving.</p>
+            <div class="btn">PLAY</div>
         </a>
-        <a href="grammar.html" class="game-card">
-            <img src="https://cdn-icons-png.flaticon.com/512/3850/3850285.png" alt="Grammar">
-            <h3>GRAMMAR</h3>
+        <a href="grammar.html" class="card">
+            <h2 style="color:var(--accent)">Grammar Train</h2>
+            <p>Find opposites to clear the tracks.</p>
+            <div class="btn">PLAY</div>
         </a>
-        <a href="dots.html" class="game-card">
-            <img src="https://cdn-icons-png.flaticon.com/512/3306/3306631.png" alt="Dots">
-            <h3>DOTS</h3>
+        <a href="dots.html" class="card">
+            <h2 style="color:var(--accent)">Dots Reflex</h2>
+            <p>Click dots in order before time runs out.</p>
+            <div class="btn">PLAY</div>
         </a>
     </div>
-    <div id="settings-overlay">
-        <h2>THEME SHOP</h2>
+
+    <button onclick="toggleShop()" style="margin-top:20px; background:none; border:1px solid #444; color:#888; padding:8px 20px; border-radius:20px; cursor:pointer;">OPEN SHOP</button>
+
+    <div id="shop-overlay">
+        <h2>SKIN SHOP</h2>
         <div class="shop-grid" id="shop-grid"></div>
-        <button onclick="toggleSettings()" style="padding:15px 50px; background:var(--accent); border:none; color:white; border-radius:30px; cursor:pointer; font-weight:bold;">CLOSE</button>
+        <button onclick="toggleShop()" style="margin-top:30px; color:white; background:none; border:none; cursor:pointer;">CLOSE</button>
     </div>
+
     <script>
-        const colors = [
-            { id: 'red', hex: '#ff0000', cost: 0 },
-            { id: 'blue', hex: '#0088ff', cost: 0 },
-            { id: 'yellow', hex: '#ffcc00', cost: 0 },
-            { id: 'green', hex: '#00ff00', cost: 200 },
-            { id: 'purple', hex: '#9900ff', cost: 200 }
-        ];
         let userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
-        let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red', 'blue', 'yellow'];
+        let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red'];
         let currentSkin = localStorage.getItem('bt_current_skin') || 'red';
+
+        const colors = [
+            {id:'red', hex:'#ff0000', cost:0},
+            {id:'blue', hex:'#0088ff', cost:500},
+            {id:'yellow', hex:'#ffcc00', cost:1000},
+            {id:'green', hex:'#00ff00', cost:2000},
+            {id:'purple', hex:'#9900ff', cost:5000}
+        ];
+
+        // RANK DEFINITIONS
+        const ranks = [
+            { name: "Student", min: 0, next: 500 },
+            { name: "Scholar", min: 500, next: 2000 },
+            { name: "Genius", min: 2000, next: 5000 },
+            { name: "Mastermind", min: 5000, next: 10000 },
+            { name: "Brain Overlord", min: 10000, next: 999999 }
+        ];
 
         function updateUI() {
             document.getElementById('brains').innerText = userBrains;
+            
+            // Update Rank Logic
+            let currentRank = ranks[0];
+            for (let r of ranks) {
+                if (userBrains >= r.min) currentRank = r;
+            }
+            
+            document.getElementById('rank-name').innerText = currentRank.name;
+            
+            // Progress calculation
+            let progress = ((userBrains - currentRank.min) / (currentRank.next - currentRank.min)) * 100;
+            document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
+            
+            if (currentRank.name === "Brain Overlord") {
+                document.getElementById('next-rank-info').innerText = "MAX RANK REACHED";
+            } else {
+                document.getElementById('next-rank-info').innerText = `Next: ${ranks[ranks.indexOf(currentRank)+1].name} at ${currentRank.next}`;
+            }
+
+            // Update Accent Color
             const skin = colors.find(c => c.id === currentSkin);
             document.documentElement.style.setProperty('--accent', skin.hex);
             renderShop();
         }
+
         function renderShop() {
             const grid = document.getElementById('shop-grid'); grid.innerHTML = '';
             colors.forEach(c => {
                 const el = document.createElement('div');
                 el.className = 'shop-item'; el.style.background = c.hex;
                 if(!unlocked.includes(c.id)) {
-                    el.innerHTML = `<span style="color:#000; font-size:12px; display:flex; justify-content:center; align-items:center; height:100%; font-weight:bold;">${c.cost}</span>`;
-                    el.onclick = () => { if(userBrains >= c.cost) { userBrains -= c.cost; unlocked.push(c.id); localStorage.setItem('bt_coins', userBrains); localStorage.setItem('bt_skins', JSON.stringify(unlocked)); updateUI(); } };
+                    el.innerHTML = `<span style="color:#000; font-size:10px; display:flex; justify-content:center; align-items:center; height:100%; font-weight:bold;">${c.cost}</span>`;
+                    el.onclick = () => { 
+                        if(userBrains >= c.cost) { 
+                            userBrains -= c.cost; 
+                            unlocked.push(c.id); 
+                            localStorage.setItem('bt_coins', userBrains); 
+                            localStorage.setItem('bt_skins', JSON.stringify(unlocked)); 
+                            updateUI(); 
+                        } 
+                    };
                 } else {
-                    if(currentSkin === c.id) el.style.boxShadow = "0 0 20px white";
-                    el.onclick = () => { currentSkin = c.id; localStorage.setItem('bt_current_skin', c.id); updateUI(); };
+                    if(currentSkin === c.id) el.style.borderColor = "white";
+                    el.onclick = () => { 
+                        currentSkin = c.id; 
+                        localStorage.setItem('bt_current_skin', c.id); 
+                        updateUI(); 
+                    };
                 }
                 grid.appendChild(el);
             });
         }
-        function toggleSettings() { const s = document.getElementById('settings-overlay'); s.style.display = (s.style.display === 'flex') ? 'none' : 'flex'; }
+
+        function toggleShop() {
+            const s = document.getElementById('shop-overlay');
+            s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
+        }
+
         updateUI();
     </script>
 </body>
