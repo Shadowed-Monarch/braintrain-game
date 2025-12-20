@@ -3,227 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Train Pro</title>
+    <title>Brain Train Hub</title>
     <style>
-        :root {
-            --bg: #000000;
-            --panel: #111111;
-            --text: #ffffff;
-            --accent: #ff0000; /* Default Neon Red */
-        }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* --- Header & Info --- */
-        header {
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-        .coin-display {
-            background: #333;
-            padding: 5px 15px;
-            border-radius: 20px;
-            color: gold;
-            font-weight: bold;
-            border: 1px solid gold;
-        }
-        .settings-btn {
-            font-size: 1.5rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: var(--text);
-        }
-        .hero-section {
-            text-align: center;
-            padding: 40px 20px;
-            max-width: 600px;
-        }
-        .hero-section h1 { margin: 0; font-size: 2.5rem; text-shadow: 0 0 10px var(--accent); }
-        .hero-section p { color: #ccc; line-height: 1.6; }
-
-        /* --- Game Cards --- */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            width: 90%;
-            max-width: 1000px;
-            margin-bottom: 50px;
-        }
-        .game-card {
-            background: var(--panel);
-            border: 2px solid var(--accent);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            text-decoration: none;
-            color: white;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px var(--accent);
-        }
-        .game-icon {
-            font-size: 4rem;
-            margin-bottom: 10px;
-        }
-
-        /* --- Settings Overlay --- */
-        #settings-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-y: auto;
-        }
-        .settings-content {
-            width: 90%; max-width: 500px;
-            background: var(--panel);
-            border: 1px solid var(--accent);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .close-btn { margin-top: 20px; padding: 10px 30px; background: var(--accent); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 5px; }
-
-        /* --- Shop Colors --- */
-        .shop-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px 0; }
-        .shop-item {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            border: 3px solid #555;
-            cursor: pointer;
-            position: relative;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: bold;
-            color: black;
-            text-shadow: 0 0 2px white;
-        }
-        .shop-item.locked { opacity: 0.5; }
-        .shop-item.locked::after { content: '🔒'; position: absolute; font-size: 1.2rem; }
-        .shop-item.active { border-color: white; box-shadow: 0 0 15px white; }
-
-        /* --- Reset Section --- */
-        .reset-section { margin-top: 30px; border-top: 1px solid #333; padding-top: 10px; }
-        .reset-btn { background: #333; color: #888; border: 1px solid #555; padding: 5px 10px; margin: 5px; cursor: pointer; font-size: 0.8rem; }
-        .reset-btn:hover { color: red; border-color: red; }
-
-        /* Rainbow Animation */
-        @keyframes rainbow-anim { 
-            0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} 
-        }
-        .rainbow-bg {
-            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff);
-            background-size: 400% 400%;
-            animation: rainbow-anim 10s ease infinite;
-        }
+        :root { --bg: #000; --panel: #111; --text: #fff; --accent: #ff0000; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background 0.5s; }
+        header { width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .coin-display { background: #333; padding: 8px 15px; border-radius: 20px; color: gold; font-weight: bold; border: 1px solid gold; }
+        .settings-btn { font-size: 1.5rem; cursor: pointer; background: none; border: none; color: white; }
+        .hero { text-align: center; padding: 40px 20px; }
+        .hero h1 { font-size: 3rem; margin: 0; text-shadow: 0 0 15px var(--accent); transition: 0.3s; }
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; width: 90%; max-width: 900px; margin-top: 20px; }
+        .game-card { background: var(--panel); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; text-decoration: none; color: white; transition: 0.3s; }
+        .game-card:hover { transform: translateY(-10px); box-shadow: 0 0 20px var(--accent); }
+        .game-icon { font-size: 3.5rem; margin-bottom: 10px; }
+        #settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .shop-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 20px; }
+        .shop-item { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #444; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; }
+        .shop-item.locked::after { content: '🔒'; position: absolute; }
+        .shop-item.active { border-color: white; transform: scale(1.1); }
+        .rainbow-bg { background: linear-gradient(45deg, red, orange, yellow, green, blue, purple); background-size: 200% 200%; animation: rainbow 5s linear infinite; }
+        @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        .reset-btn { background: #222; color: #ff4d4d; border: 1px solid #444; padding: 10px; margin: 5px; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
-
     <header>
-        <button class="settings-btn" onclick="toggleSettings()">⚙️ Settings</button>
-        <div class="coin-display">🪙 <span id="coin-count">0</span></div>
+        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+        <div class="coin-display">🪙 <span id="coins">0</span></div>
     </header>
 
-    <div class="hero-section">
-        <h1>BRAIN TRAIN</h1>
-        <p>Train your brain speed. Complete levels to earn coins. Unlock new neon themes. Start your journey below.</p>
+    <div class="hero">
+        <h1 id="main-title">BRAIN TRAIN</h1>
+        <p>Speed training for your mind. Earn coins to unlock new styles.</p>
     </div>
 
     <div class="games-grid">
-        <a href="math.html" class="game-card">
-            <div class="game-icon">➗</div>
-            <h2>MATH</h2>
-            <p>Calculate Fast</p>
-        </a>
-        <a href="grammar.html" class="game-card">
-            <div class="game-icon">ABC</div>
-            <h2>GRAMMAR</h2>
-            <p>Spot the Errors</p>
-        </a>
-        <a href="dots.html" class="game-card">
-            <div class="game-icon">🔘</div>
-            <h2>DOTS</h2>
-            <p>Reflex Test</p>
-        </a>
+        <a href="math.html" class="game-card"><div class="game-icon">➗</div><h3>MATH</h3></a>
+        <a href="grammar.html" class="game-card"><div class="game-icon">ABC</div><h3>GRAMMAR</h3></a>
+        <a href="dots.html" class="game-card"><div class="game-icon">🔘</div><h3>DOTS</h3></a>
     </div>
 
     <div id="settings-overlay">
-        <div class="settings-content">
-            <h2>THEME SHOP</h2>
-            <p>Select a color. Buy locked ones with coins.</p>
-            <div class="shop-grid" id="shop-grid">
-                </div>
-
-            <div class="reset-section">
-                <h3>Manage Data</h3>
-                <button class="reset-btn" onclick="resetSubject('math')">Reset Math</button>
-                <button class="reset-btn" onclick="resetSubject('grammar')">Reset Grammar</button>
-                <button class="reset-btn" onclick="resetSubject('dots')">Reset Dots</button>
-            </div>
-
-            <button class="close-btn" onclick="toggleSettings()">CLOSE</button>
+        <h2>THEME SHOP</h2>
+        <div class="shop-grid" id="shop-grid"></div>
+        <div style="margin-top:20px;">
+            <button class="reset-btn" onclick="resetGame('math')">Reset Math</button>
+            <button class="reset-btn" onclick="resetGame('grammar')">Reset Grammar</button>
+            <button class="reset-btn" onclick="resetGame('dots')">Reset Dots</button>
         </div>
+        <button onclick="toggleSettings()" style="margin-top:30px; padding:10px 40px; background:var(--accent); border:none; color:white; font-weight:bold; cursor:pointer;">CLOSE</button>
     </div>
 
     <script>
-        // --- Data Management ---
         const colors = [
-            { id: 'red', hex: '#ff0000', cost: 0, name: 'Red' },
-            { id: 'blue', hex: '#0088ff', cost: 0, name: 'Blue' },
-            { id: 'yellow', hex: '#ffcc00', cost: 0, name: 'Ylw' },
-            { id: 'green', hex: '#00ff00', cost: 200, name: 'Grn' },
-            { id: 'purple', hex: '#9900ff', cost: 200, name: 'Pur' },
-            { id: 'cyan', hex: '#00ffff', cost: 300, name: 'Cyn' },
-            { id: 'rainbow', hex: 'rainbow', cost: 1000, name: '🌈' } // Special Logic
+            { id: 'red', hex: '#ff0000', cost: 0 },
+            { id: 'blue', hex: '#0088ff', cost: 0 },
+            { id: 'yellow', hex: '#ffcc00', cost: 0 },
+            { id: 'green', hex: '#00ff00', cost: 200 },
+            { id: 'purple', hex: '#9900ff', cost: 200 },
+            { id: 'rainbow', hex: 'rainbow', cost: 1000 }
         ];
 
+        function migrate() {
+            let bonus = 0;
+            ['math', 'grammar', 'dots'].forEach(s => {
+                const old = localStorage.getItem('rs_pro_v3_'+s);
+                if (old && !localStorage.getItem('bt_'+s+'_max_lvl')) {
+                    const lvl = parseInt(old);
+                    localStorage.setItem('bt_'+s+'_max_lvl', lvl);
+                    bonus += 100 + (lvl - 1) * 10 + Math.floor(lvl / 10) * 100;
+                }
+            });
+            if (bonus > 0) {
+                let c = parseInt(localStorage.getItem('bt_coins')) || 0;
+                localStorage.setItem('bt_coins', c + bonus);
+            }
+        }
+        migrate();
+
         let userCoins = parseInt(localStorage.getItem('bt_coins')) || 0;
-        let unlockedSkins = JSON.parse(localStorage.getItem('bt_skins')) || ['red', 'blue', 'yellow'];
+        let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red', 'blue', 'yellow'];
         let currentSkin = localStorage.getItem('bt_current_skin') || 'red';
 
         function updateUI() {
-            document.getElementById('coin-count').innerText = userCoins;
-            applyTheme(currentSkin);
+            document.getElementById('coins').innerText = userCoins;
+            const skin = colors.find(c => c.id === currentSkin);
+            document.documentElement.style.setProperty('--accent', skin.hex === 'rainbow' ? 'white' : skin.hex);
             renderShop();
-        }
-
-        function applyTheme(skinId) {
-            const skin = colors.find(c => c.id === skinId);
-            if(!skin) return;
-            
-            if(skinId === 'rainbow') {
-                document.documentElement.style.setProperty('--accent', 'white');
-                document.querySelector('.hero-section h1').classList.add('rainbow-bg');
-                document.querySelector('.hero-section h1').style.webkitBackgroundClip = 'text';
-                document.querySelector('.hero-section h1').style.color = 'transparent';
-            } else {
-                document.documentElement.style.setProperty('--accent', skin.hex);
-                document.querySelector('.hero-section h1').classList.remove('rainbow-bg');
-                document.querySelector('.hero-section h1').style.webkitBackgroundClip = 'initial';
-                document.querySelector('.hero-section h1').style.color = skin.hex;
-            }
         }
 
         function renderShop() {
@@ -231,60 +97,39 @@
             grid.innerHTML = '';
             colors.forEach(c => {
                 const el = document.createElement('div');
-                el.className = 'shop-item';
-                
-                // Style the bubble
-                if(c.id === 'rainbow') el.classList.add('rainbow-bg');
-                else el.style.background = c.hex;
-
-                const isUnlocked = unlockedSkins.includes(c.id);
-                const isActive = currentSkin === c.id;
-
-                if(!isUnlocked) {
+                el.className = 'shop-item' + (c.id === 'rainbow' ? ' rainbow-bg' : '');
+                if(c.id !== 'rainbow') el.style.background = c.hex;
+                if(!unlocked.includes(c.id)) {
                     el.classList.add('locked');
-                    el.innerHTML = `<span>${c.cost}</span>`;
-                    el.onclick = () => buySkin(c);
+                    el.innerHTML = `<span style="color:black; font-size:10px; margin-top:20px;">${c.cost}</span>`;
+                    el.onclick = () => {
+                        if(userCoins >= c.cost && confirm('Buy this color?')) {
+                            userCoins -= c.cost; unlocked.push(c.id);
+                            localStorage.setItem('bt_coins', userCoins);
+                            localStorage.setItem('bt_skins', JSON.stringify(unlocked));
+                            updateUI();
+                        }
+                    };
                 } else {
-                    if(isActive) el.classList.add('active');
-                    el.onclick = () => setSkin(c.id);
+                    if(currentSkin === c.id) el.classList.add('active');
+                    el.onclick = () => { currentSkin = c.id; localStorage.setItem('bt_current_skin', c.id); updateUI(); };
                 }
                 grid.appendChild(el);
             });
         }
 
-        function buySkin(skin) {
-            if(userCoins >= skin.cost) {
-                if(confirm(`Buy ${skin.name} for ${skin.cost} coins?`)) {
-                    userCoins -= skin.cost;
-                    unlockedSkins.push(skin.id);
-                    localStorage.setItem('bt_coins', userCoins);
-                    localStorage.setItem('bt_skins', JSON.stringify(unlockedSkins));
-                    setSkin(skin.id); // Auto equip
-                }
-            } else {
-                alert("Not enough coins!");
-            }
-        }
-
-        function setSkin(id) {
-            currentSkin = id;
-            localStorage.setItem('bt_current_skin', currentSkin);
-            updateUI();
-        }
-
         function toggleSettings() {
-            const el = document.getElementById('settings-overlay');
-            el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+            const s = document.getElementById('settings-overlay');
+            s.style.display = s.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function resetSubject(subj) {
-            if(confirm(`Are you sure you want to reset all ${subj.toUpperCase()} progress? This cannot be undone.`)) {
-                localStorage.setItem(`bt_${subj}_max_lvl`, 1);
-                alert("Reset complete.");
+        function resetGame(s) {
+            if(confirm('Reset all '+s+' progress?')) {
+                localStorage.setItem('bt_'+s+'_max_lvl', 1);
+                location.reload();
             }
         }
 
-        // Init
         updateUI();
     </script>
 </body>
