@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Train - Fixed</title>
+    <title>Grammar Train - Fixed</title>
     <style>
         :root { --bg: #000; --accent: #f00; --brain: #ff77ff; }
         body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
         header { width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
         .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
         #game-container { position: relative; width: 95%; max-width: 800px; height: 450px; background: #080808; border: 2px solid var(--accent); border-radius: 15px; margin-top: 20px; overflow: hidden; }
-        .bubble { position: absolute; background: var(--accent); padding: 12px 18px; border-radius: 25px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 0 15px var(--accent); white-space: nowrap; transition: transform 0.05s linear; }
-        #ans { padding: 15px; width: 80%; max-width: 320px; margin-top: 25px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 24px; text-align: center; outline: none; }
+        .bubble { position: absolute; background: var(--accent); padding: 12px 22px; border-radius: 30px; font-weight: bold; box-shadow: 0 0 15px var(--accent); text-align: center; min-width: 130px; white-space: nowrap; transition: transform 0.05s linear; }
+        .bubble span { display: block; font-size: 0.65rem; opacity: 0.9; margin-bottom: 2px; }
+        #ans { padding: 15px; width: 80%; max-width: 320px; margin-top: 25px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 22px; text-align: center; outline: none; }
         #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
         .diff-btn { padding: 10px 20px; margin: 5px; border: 1px solid #444; background: #222; color: white; cursor: pointer; border-radius: 8px; font-weight: bold; }
         .diff-btn.active { border-color: var(--accent); background: var(--accent); }
@@ -24,7 +25,7 @@
     </header>
     <div id="game-container">
         <div id="overlay">
-            <h2>MATH TRAIN</h2>
+            <h2>GRAMMAR TRAIN</h2>
             <p>Select max questions on screen:</p>
             <div>
                 <button class="diff-btn active" onclick="setLimit(1, 1.0, this)">1 (Normal)</button>
@@ -34,7 +35,7 @@
             <button onclick="game.start()" style="margin-top:20px; padding:12px 50px; background:var(--accent); border:none; color:white; border-radius:30px; font-weight:bold; cursor:pointer;">START</button>
         </div>
     </div>
-    <input type="number" id="ans" placeholder="?" autocomplete="off">
+    <input type="text" id="ans" placeholder="Type opposite..." autocomplete="off">
 
     <script>
         let maxB = 1, baseS = 1.0;
@@ -44,54 +45,57 @@
             btn.classList.add('active');
         }
 
-        class MathGame {
+        class GrammarGame {
             constructor() {
                 this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
                 this.skin = localStorage.getItem('bt_current_skin') || 'red';
-                this.active = []; this.isPlaying = false; this.solved = 0;
-                this.applyTheme();
-                document.getElementById('cur-brains').innerText = this.brains;
+                this.fullBank = [
+                    {q:"HOT", a:["cold", "chilly"]}, {q:"FAST", a:["slow", "sluggish"]},
+                    {q:"BIG", a:["small", "tiny"]}, {q:"HAPPY", a:["sad", "unhappy"]},
+                    {q:"RICH", a:["poor", "broke"]}, {q:"START", a:["end", "finish"]},
+                    {q:"CLEAN", a:["dirty", "messy"]}, {q:"STRONG", a:["weak", "feeble"]}
+                ];
+                this.applyTheme(); document.getElementById('cur-brains').innerText = this.brains;
             }
             applyTheme() {
                 const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f'};
                 document.documentElement.style.setProperty('--accent', c[this.skin] || '#f00');
             }
             start() {
-                this.isPlaying = true; this.solved = 0; this.active = []; 
+                this.isPlaying = true; this.solved = 0; this.active = [];
+                this.levelBank = [...this.fullBank].sort(() => 0.5 - Math.random()).slice(0, 10);
                 document.getElementById('overlay').style.display = 'none';
                 document.getElementById('ans').focus();
                 this.loop();
-                this.spawnInt = setInterval(() => { 
-                    if(this.active.length < maxB && (this.solved + this.active.length < 10)) this.spawn(); 
-                }, 1500); // Slower spawn rate to prevent bunching
+                this.spawnInt = setInterval(() => { if(this.active.length < maxB && this.levelBank.length > 0) this.spawn(); }, 2000);
             }
             spawn() {
-                const a = Math.floor(Math.random()*12)+1, b = Math.floor(Math.random()*12)+1;
-                const el = document.createElement('div'); el.className = 'bubble'; el.innerText = `${a}+${b}`;
+                const item = this.levelBank.pop();
+                const el = document.createElement('div'); el.className = 'bubble'; el.innerHTML = `<span>Opposite of:</span>${item.q}`;
                 
-                // Fixed Vertical Spacing (Prevents spawning too high or too low)
+                // Fixed Vertical Spacing
                 let topPos;
                 let isTooClose;
                 let attempts = 0;
                 do {
                     isTooClose = false;
-                    topPos = Math.random() * 320 + 30; // Min 30px from top, Max 350px
+                    topPos = Math.random() * 300 + 40;
                     for(let b of this.active) {
-                        if(Math.abs(topPos - b.y) < 60) isTooClose = true; // Keep 60px distance
+                        if(Math.abs(topPos - b.y) < 70) isTooClose = true; 
                     }
                     attempts++;
                 } while(isTooClose && attempts < 10);
 
                 el.style.top = topPos + 'px';
                 document.getElementById('game-container').appendChild(el);
-                this.active.push({ el, x: -120, y: topPos, speed: baseS, ans: (a+b).toString() });
+                this.active.push({ el, x: -160, y: topPos, speed: baseS, answers: item.a });
             }
             loop() {
                 if(!this.isPlaying) return;
                 this.active.forEach(ent => {
                     ent.x += ent.speed;
                     ent.el.style.transform = `translateX(${ent.x}px)`;
-                    if(ent.x > 820) this.end('GAME OVER');
+                    if(ent.x > 820) this.end('FAIL');
                 });
                 requestAnimationFrame(() => this.loop());
             }
@@ -100,20 +104,16 @@
                 document.querySelectorAll('.bubble').forEach(b => b.remove());
                 document.getElementById('overlay').style.display = 'flex';
                 if(res === 'SUCCESS') { 
-                    this.brains += 20; 
-                    localStorage.setItem('bt_coins', this.brains); 
+                    this.brains += 30; localStorage.setItem('bt_coins', this.brains); 
                     document.getElementById('cur-brains').innerText = this.brains; 
                 }
             }
         }
-        const game = new MathGame();
+        const game = new GrammarGame();
         document.getElementById('ans').addEventListener('input', (e) => {
-            const i = game.active.findIndex(ent => ent.ans === e.target.value);
-            if(i !== -1) { 
-                game.active[i].el.remove(); game.active.splice(i, 1); 
-                game.solved++; e.target.value = ''; 
-                if(game.solved >= 10) game.end('SUCCESS'); 
-            }
+            const val = e.target.value.toLowerCase().trim();
+            const i = game.active.findIndex(ent => ent.answers.includes(val));
+            if(i !== -1) { game.active[i].el.remove(); game.active.splice(i, 1); game.solved++; e.target.value = ''; if(game.solved >= 10) game.end('SUCCESS'); }
         });
     </script>
 </body>
