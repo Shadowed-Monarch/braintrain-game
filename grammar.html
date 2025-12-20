@@ -9,14 +9,11 @@
         body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
         header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
         .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
-        
         #game-container { position: relative; width: 95%; max-width: 800px; height: 350px; background: #080808; border: 2px solid var(--accent); border-radius: 15px; margin-top: 10px; overflow: hidden; }
         .bubble { position: absolute; background: var(--accent); width: 150px; height: 70px; border-radius: 15px; font-weight: bold; box-shadow: 0 0 15px var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; text-align: center; padding: 5px; box-sizing: border-box; transition: transform 0.1s; }
         .bubble span { font-size: 0.7rem; opacity: 0.8; margin-bottom: 3px; }
-        
         #ans { padding: 15px; width: 80%; max-width: 300px; margin-top: 20px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 12px; font-size: 22px; text-align: center; outline: none; }
         #ans.correct { border-color: #0f0; box-shadow: 0 0 15px #0f0; }
-
         #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
         .level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-height: 200px; overflow-y: auto; margin: 15px 0; padding: 10px; width: 100%; }
         .lvl-btn { padding: 10px; border: 2px solid #333; background: #111; color: #666; cursor: not-allowed; border-radius: 8px; font-weight: bold; }
@@ -30,14 +27,14 @@
     <header>
         <a href="index.html" style="color:white; text-decoration:none; border:1px solid #fff; padding:5px 12px; border-radius:5px; font-size: 0.8rem;">HOME</a>
         <div style="font-weight: bold; color: var(--accent);">LVL <span id="display-lvl">1</span></div>
-        <div class="brain-wrap"><img src="https://img.icons8.com/fluency/48/brain.png" style="width:20px;"> <span id="cur-brains">0</span></div>
+        <div class="brain-wrap"><span>🧠</span> <span id="cur-brains">0</span></div>
     </header>
 
     <div id="game-container">
         <div id="overlay">
             <h2 id="m-title">GRAMMAR TRAIN</h2>
             <div class="level-grid" id="lvl-grid"></div>
-            <button class="start-btn" onclick="game.start()">START TRAIN</button>
+            <button class="start-btn" id="main-start-btn" onclick="game.start()">START TRAIN</button>
         </div>
     </div>
 
@@ -50,109 +47,108 @@
             constructor() {
                 this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
                 this.unlockedLvl = parseInt(localStorage.getItem('bt_unlocked_grammar')) || 1;
-                
-                // YOUR BIG LIST OF WORDS WITH MULTIPLE ANSWERS
-                this.wordBank = [
-                    {q:"EASY", a:["difficult", "arduous", "challenging", "demanding", "tough"]},
-                    {q:"BRIGHT", a:["dim", "dark", "dull", "gloomy", "obscure"]},
-                    {q:"HAPPY", a:["sad", "miserable", "depressed", "sorrowful", "melancholy"]},
-                    {q:"FAST", a:["slow", "sluggish", "leaden", "leisurely", "gradual"]},
-                    {q:"BIG", a:["small", "tiny", "minute", "petite", "microscopic"]},
-                    {q:"HOT", a:["cold", "chilly", "frigid", "freezing", "icy"]},
-                    {q:"STRONG", a:["weak", "feeble", "fragile", "frail", "puny"]},
-                    {q:"RICH", a:["poor", "impoverished", "needy", "destitute", "penniless"]},
-                    {q:"CLEAN", a:["dirty", "filthy", "grimy", "soiled", "polluted"]},
-                    {q:"BRAVE", a:["cowardly", "fearful", "timid", "craven", "meek"]},
-                    {q:"QUIET", a:["loud", "noisy", "deafening", "rowdy", "boisterous"]},
-                    {q:"NEW", a:["old", "ancient", "antique", "dated", "obsolete"]},
-                    {q:"SMOOTH", a:["rough", "bumpy", "coarse", "rugged", "uneven"]},
-                    {q:"SHARP", a:["dull", "blunt", "rounded", "flat", "obtuse"]},
-                    {q:"DEEP", a:["shallow", "superficial", "slight", "surface-level", "flat"]},
-                    {q:"TRUE", a:["false", "fake", "incorrect", "erroneous", "mendacious"]},
-                    {q:"WIDE", a:["narrow", "thin", "slender", "tight", "constricted"]},
-                    {q:"FULL", a:["empty", "vacant", "void", "hollow", "depleted"]},
-                    {q:"SMART", a:["stupid", "ignorant", "unintelligent", "foolish", "simple-minded"]},
-                    {q:"KIND", a:["cruel", "mean", "malicious", "heartless", "callous"]},
-                    {q:"HIGH", a:["low", "deep", "short", "sunken", "bottom"]},
-                    {q:"YOUNG", a:["old", "aged", "elderly", "ancient", "mature"]},
-                    {q:"LOVE", a:["hate", "hatred", "abhorrence", "loathing", "detestation"]},
-                    {q:"VICTORY", a:["defeat", "loss", "failure", "beating", "rout"]},
-                    {q:"THICK", a:["thin", "slender", "slim", "fine", "narrow"]},
-                    {q:"FIRST", a:["last", "final", "ending", "ultimate", "concluding"]},
-                    {q:"CHEAP", a:["expensive", "costly", "pricey", "valuable", "extravagant"]},
-                    {q:"BEAUTIFUL", a:["ugly", "hideous", "unattractive", "grotesque", "revolting"]},
-                    {q:"SWEET", a:["sour", "bitter", "salty", "acidic", "tart"]},
-                    {q:"HEALTHY", a:["sick", "ill", "unwell", "ailing", "diseased"]},
-                    {q:"SAFE", a:["dangerous", "risky", "perilous", "unsafe", "hazardous"]},
-                    {q:"HEAVY", a:["light", "weightless", "airy", "buoyant", "flimsy"]},
-                    {q:"SUCCESS", a:["failure", "disaster", "flop", "fiasco", "defeat"]},
-                    {q:"START", a:["stop", "finish", "end", "cease", "conclude"]},
-                    {q:"ALIVE", a:["dead", "deceased", "lifeless", "departed", "extinct"]},
-                    {q:"DRY", a:["wet", "damp", "moist", "soggy", "soaked"]},
-                    {q:"ACTIVE", a:["passive", "idle", "lazy", "inactive", "dormant"]},
-                    {q:"ABOVE", a:["below", "under", "beneath", "underneath", "lower"]},
-                    {q:"GENTLE", a:["rough", "harsh", "violent", "brutal", "fierce"]},
-                    {q:"FRIENDLY", a:["hostile", "cold", "unfriendly", "aloof", "antagonistic"]},
-                    {q:"TIGHT", a:["loose", "slack", "baggy", "limp", "relaxed"]},
-                    {q:"WIN", a:["lose", "fail", "surrender", "yield", "forfeit"]},
-                    {q:"PEACE", a:["war", "conflict", "strife", "chaos", "turmoil"]},
-                    {q:"BEST", a:["worst", "least", "poorest", "lowest", "meanest"]},
-                    {q:"WISE", a:["foolish", "naive", "unwise", "silly", "gullible"]},
-                    {q:"HARD", a:["soft", "squishy", "tender", "flexible", "pliant"]},
-                    {q:"SIMPLE", a:["complex", "intricate", "complicated", "elaborate", "ornate"]},
-                    {q:"OPEN", a:["closed", "shut", "sealed", "blocked", "locked"]},
-                    {q:"NEAR", a:["far", "distant", "remote", "away", "yonder"]},
-                    {q:"EARLY", a:["late", "delayed", "tardy", "belated", "overdue"]},
-                    {q:"GAIN", a:["loss", "reduction", "decline", "decrease", "depletion"]},
-                    {q:"BITTER", a:["sweet", "sugary", "honeyed", "pleasant", "mild"]},
-                    {q:"CAREFUL", a:["careless", "reckless", "negligent", "heedless", "rash"]},
-                    {q:"LAUGH", a:["cry", "weep", "sob", "mourn", "grieve"]},
-                    {q:"TAME", a:["wild", "feral", "untamed", "savage", "fierce"]},
-                    {q:"MODERN", a:["ancient", "antique", "old-fashioned", "archaic", "traditional"]},
-                    {q:"PUBLIC", a:["private", "secret", "confidential", "personal", "hidden"]},
-                    {q:"DIRECT", a:["indirect", "roundabout", "meandering", "deviating", "crooked"]},
-                    {q:"GIANT", a:["tiny", "dwarf", "midget", "small", "miniature"]},
-                    {q:"LEAD", a:["follow", "trail", "accompany", "obey", "subordinate"]},
-                    {q:"POLITE", a:["rude", "impolite", "boorish", "discourteous", "insulting"]},
-                    {q:"ACCEPT", a:["reject", "refuse", "decline", "deny", "spurn"]},
-                    {q:"CREATE", a:["destroy", "demolish", "ruin", "dismantle", "annihilate"]},
-                    {q:"FAIR", a:["unfair", "biased", "unjust", "partial", "prejudiced"]},
-                    {q:"HUMBLE", a:["proud", "arrogant", "vain", "haughty", "conceited"]},
-                    {q:"INNER", a:["outer", "exterior", "external", "outward", "surface"]},
-                    {q:"ALWAYS", a:["never", "rarely", "seldom", "occasionally", "infrequently"]},
-                    {q:"BORROW", a:["lend", "return", "provide", "grant", "give"]},
-                    {q:"BUILD", a:["demolish", "raze", "destroy", "break", "wreck"]},
-                    {q:"CERTAIN", a:["uncertain", "doubtful", "unsure", "hesitant", "ambiguous"]},
-                    {q:"CHEERFUL", a:["gloomy", "sad", "grumpy", "morose", "somber"]},
-                    {q:"DELICIOUS", a:["distasteful", "yucky", "repulsive", "bland", "unpalatable"]},
-                    {q:"EQUAL", a:["unequal", "different", "uneven", "disproportionate", "varied"]},
-                    {q:"FAMOUS", a:["unknown", "anonymous", "obscure", "unheard-of", "inglorious"]},
-                    {q:"FERTILE", a:["barren", "sterile", "infertile", "arid", "unproductive"]},
-                    {q:"GENERAL", a:["specific", "particular", "unique", "limited", "special"]},
-                    {q:"HOPE", a:["despair", "doubt", "pessimism", "despondency", "hopelessness"]},
-                    {q:"JOIN", a:["separate", "divide", "detach", "disconnect", "sever"]},
-                    {q:"KNOWLEDGE", a:["ignorance", "illiteracy", "unfamiliarity", "confusion", "inexperience"]},
-                    {q:"LITERAL", a:["figurative", "metaphorical", "symbolic", "abstract", "allegorical"]},
-                    {q:"MAJORITY", a:["minority", "handful", "few", "fraction", "scarcity"]},
-                    {q:"NATURAL", a:["artificial", "man-made", "synthetic", "unnatural", "affected"]},
-                    {q:"NORMAL", a:["abnormal", "weird", "strange", "unusual", "eccentric"]},
-                    {q:"OBEY", a:["disobey", "defy", "rebel", "resist", "transgress"]},
-                    {q:"PATIENCE", a:["impatience", "eagerness", "irritation", "restlessness", "haste"]},
-                    {q:"PERMANENT", a:["temporary", "brief", "fleeting", "transient", "ephemeral"]},
-                    {q:"PLENTY", a:["scarcity", "lack", "dearth", "shortage", "insufficiency"]},
-                    {q:"PRAISE", a:["criticize", "condemn", "scold", "blame", "reprimand"]},
-                    {q:"QUICK", a:["slow", "lethargic", "deliberate", "leisurely", "sluggish"]},
-                    {q:"REAL", a:["fake", "imaginary", "fictional", "artificial", "false"]},
-                    {q:"REMEMBER", a:["forget", "overlook", "neglect", "ignore", "dismiss"]},
-                    {q:"ROUGH", a:["smooth", "silky", "level", "polished", "even"]},
-                    {q:"SOBER", a:["drunk", "intoxicated", "inebriated", "tipsy", "wasted"]},
-                    {q:"SOLID", a:["liquid", "gas", "hollow", "soft", "fragile"]},
-                    {q:"TIDY", a:["messy", "untidy", "cluttered", "chaotic", "sloppy"]},
-                    {q:"UNIQUE", a:["common", "ordinary", "usual", "typical", "standard"]},
-                    {q:"UNITY", a:["division", "discord", "separation", "disunity", "conflict"]},
-                    {q:"VERTICAL", a:["horizontal", "flat", "level", "recumbent", "prone"]}
-                ];
-
+this.wordBank = [
+    {q:"EASY", a:["difficult", "tough", "arduous", "demanding", "challenging"]},
+    {q:"BRIGHT", a:["dark", "dim", "dull", "gloomy", "obscure"]},
+    {q:"HAPPY", a:["sad", "miserable", "depressed", "sorrowful", "melancholy"]},
+    {q:"FAST", a:["slow", "sluggish", "leaden", "leisurely", "gradual"]},
+    {q:"BIG", a:["small", "tiny", "minute", "petite", "microscopic"]},
+    {q:"HOT", a:["cold", "chilly", "frigid", "freezing", "icy"]},
+    {q:"STRONG", a:["weak", "feeble", "fragile", "frail", "puny"]},
+    {q:"RICH", a:["poor", "impoverished", "needy", "destitute", "penniless"]},
+    {q:"CLEAN", a:["dirty", "filthy", "grimy", "soiled", "polluted"]},
+    {q:"BRAVE", a:["cowardly", "fearful", "timid", "craven", "meek"]},
+    {q:"QUIET", a:["loud", "noisy", "deafening", "rowdy", "boisterous"]},
+    {q:"NEW", a:["old", "ancient", "antique", "dated", "obsolete"]},
+    {q:"SMOOTH", a:["rough", "bumpy", "coarse", "rugged", "uneven"]},
+    {q:"SHARP", a:["dull", "blunt", "rounded", "flat", "obtuse"]},
+    {q:"DEEP", a:["shallow", "superficial", "slight", "surface-level", "flat"]},
+    {q:"TRUE", a:["false", "fake", "incorrect", "erroneous", "mendacious"]},
+    {q:"WIDE", a:["narrow", "thin", "slender", "tight", "constricted"]},
+    {q:"FULL", a:["empty", "vacant", "void", "hollow", "depleted"]},
+    {q:"SMART", a:["stupid", "ignorant", "unintelligent", "foolish", "simple-minded"]},
+    {q:"KIND", a:["cruel", "mean", "malicious", "heartless", "callous"]},
+    {q:"HIGH", a:["low", "deep", "short", "sunken", "bottom"]},
+    {q:"YOUNG", a:["old", "aged", "elderly", "ancient", "mature"]},
+    {q:"LOVE", a:["hate", "hatred", "abhorrence", "loathing", "detestation"]},
+    {q:"VICTORY", a:["defeat", "loss", "failure", "beating", "rout"]},
+    {q:"THICK", a:["thin", "slender", "slim", "fine", "narrow"]},
+    {q:"FIRST", a:["last", "final", "ending", "ultimate", "concluding"]},
+    {q:"CHEAP", a:["expensive", "costly", "pricey", "valuable", "extravagant"]},
+    {q:"BEAUTIFUL", a:["ugly", "hideous", "unattractive", "grotesque", "revolting"]},
+    {q:"SWEET", a:["sour", "bitter", "salty", "acidic", "tart"]},
+    {q:"HEALTHY", a:["sick", "ill", "unwell", "ailing", "diseased"]},
+    {q:"SAFE", a:["dangerous", "risky", "perilous", "unsafe", "hazardous"]},
+    {q:"HEAVY", a:["light", "weightless", "airy", "buoyant", "flimsy"]},
+    {q:"SUCCESS", a:["failure", "disaster", "flop", "fiasco", "defeat"]},
+    {q:"START", a:["stop", "finish", "end", "cease", "conclude"]},
+    {q:"ALIVE", a:["dead", "deceased", "lifeless", "departed", "extinct"]},
+    {q:"DRY", a:["wet", "damp", "moist", "soggy", "soaked"]},
+    {q:"ACTIVE", a:["passive", "idle", "lazy", "inactive", "dormant"]},
+    {q:"ABOVE", a:["below", "under", "beneath", "underneath", "lower"]},
+    {q:"GENTLE", a:["rough", "harsh", "violent", "brutal", "fierce"]},
+    {q:"FRIENDLY", a:["hostile", "cold", "unfriendly", "aloof", "antagonistic"]},
+    {q:"TIGHT", a:["loose", "slack", "baggy", "limp", "relaxed"]},
+    {q:"WIN", a:["lose", "fail", "surrender", "yield", "forfeit"]},
+    {q:"PEACE", a:["war", "conflict", "strife", "chaos", "turmoil"]},
+    {q:"BEST", a:["worst", "least", "poorest", "lowest", "meanest"]},
+    {q:"WISE", a:["foolish", "naive", "unwise", "silly", "gullible"]},
+    {q:"HARD", a:["soft", "squishy", "tender", "flexible", "pliant"]},
+    {q:"SIMPLE", a:["complex", "intricate", "complicated", "elaborate", "ornate"]},
+    {q:"OPEN", a:["closed", "shut", "sealed", "blocked", "locked"]},
+    {q:"NEAR", a:["far", "distant", "remote", "away", "yonder"]},
+    {q:"EARLY", a:["late", "delayed", "tardy", "belated", "overdue"]},
+    {q:"GAIN", a:["loss", "reduction", "decline", "decrease", "depletion"]},
+    {q:"BITTER", a:["sweet", "sugary", "honeyed", "pleasant", "mild"]},
+    {q:"CAREFUL", a:["careless", "reckless", "negligent", "heedless", "rash"]},
+    {q:"LAUGH", a:["cry", "weep", "sob", "mourn", "grieve"]},
+    {q:"TAME", a:["wild", "feral", "untamed", "savage", "fierce"]},
+    {q:"TRUE", a:["false", "wrong", "untrue", "spurious", "bogus"]},
+    {q:"MODERN", a:["ancient", "antique", "old-fashioned", "archaic", "traditional"]},
+    {q:"PUBLIC", a:["private", "secret", "confidential", "personal", "hidden"]},
+    {q:"EMPTY", a:["full", "occupied", "crowded", "packed", "brimming"]},
+    {q:"DIRECT", a:["indirect", "roundabout", "meandering", "deviating", "crooked"]},
+    {q:"GIANT", a:["tiny", "dwarf", "midget", "small", "miniature"]},
+    {q:"LEAD", a:["follow", "trail", "accompany", "obey", "subordinate"]},
+    {q:"POLITE", a:["rude", "impolite", "boorish", "discourteous", "insulting"]},
+    {q:"ACCEPT", a:["reject", "refuse", "decline", "deny", "spurn"]},
+    {q:"CREATE", a:["destroy", "demolish", "ruin", "dismantle", "annihilate"]},
+    {q:"FAIR", a:["unfair", "biased", "unjust", "partial", "prejudiced"]},
+    {q:"HUMBLE", a:["proud", "arrogant", "vain", "haughty", "conceited"]},
+    {q:"INNER", a:["outer", "exterior", "external", "outward", "surface"]},
+    {q:"ALWAYS", a:["never", "rarely", "seldom", "occasionally", "infrequently"]},
+    {q:"BORROW", a:["lend", "return", "provide", "grant", "give"]},
+    {q:"BUILD", a:["demolish", "raze", "destroy", "break", "wreck"]},
+    {q:"CERTAIN", a:["uncertain", "doubtful", "unsure", "hesitant", "ambiguous"]},
+    {q:"CHEERFUL", a:["gloomy", "sad", "grumpy", "morose", "somber"]},
+    {q:"DELICIOUS", a:["distasteful", "yucky", "repulsive", "bland", "unpalatable"]},
+    {q:"EQUAL", a:["unequal", "different", "uneven", "disproportionate", "varied"]},
+    {q:"FAMOUS", a:["unknown", "anonymous", "obscure", "unheard-of", "inglorious"]},
+    {q:"FERTILE", a:["barren", "sterile", "infertile", "arid", "unproductive"]},
+    {q:"GENERAL", a:["specific", "particular", "unique", "limited", "special"]},
+    {q:"HOPE", a:["despair", "doubt", "pessimism", "despondency", "hopelessness"]},
+    {q:"JOIN", a:["separate", "divide", "detach", "disconnect", "sever"]},
+    {q:"KNOWLEDGE", a:["ignorance", "illiteracy", "unfamiliarity", "confusion", "inexperience"]},
+    {q:"LITERAL", a:["figurative", "metaphorical", "symbolic", "abstract", "allegorical"]},
+    {q:"MAJORITY", a:["minority", "handful", "few", "fraction", "scarcity"]},
+    {q:"NATURAL", a:["artificial", "man-made", "synthetic", "unnatural", "affected"]},
+    {q:"NORMAL", a:["abnormal", "weird", "strange", "unusual", "eccentric"]},
+    {q:"OBEY", a:["disobey", "defy", "rebel", "resist", "transgress"]},
+    {q:"PATIENCE", a:["impatience", "eagerness", "irritation", "restlessness", "haste"]},
+    {q:"PERMANENT", a:["temporary", "brief", "fleeting", "transient", "ephemeral"]},
+    {q:"PLENTY", a:["scarcity", "lack", "dearth", "shortage", "insufficiency"]},
+    {q:"PRAISE", a:["criticize", "condemn", "scold", "blame", "reprimand"]},
+    {q:"QUICK", a:["slow", "lethargic", "deliberate", "leisurely", "sluggish"]},
+    {q:"REAL", a:["fake", "imaginary", "fictional", "artificial", "false"]},
+    {q:"REMEMBER", a:["forget", "overlook", "neglect", "ignore", "dismiss"]},
+    {q:"ROUGH", a:["smooth", "silky", "level", "polished", "even"]},
+    {q:"SOBER", a:["drunk", "intoxicated", "inebriated", "tipsy", "wasted"]},
+    {q:"SOLID", a:["liquid", "gas", "hollow", "soft", "fragile"]},
+    {q:"TIDY", a:["messy", "untidy", "cluttered", "chaotic", "sloppy"]},
+    {q:"UNIQUE", a:["common", "ordinary", "usual", "typical", "standard"]},
+    {q:"UNITY", a:["division", "discord", "separation", "disunity", "conflict"]},
+    {q:"VERTICAL", a:["horizontal", "flat", "level", "recumbent", "prone"]}
+];
                 this.isPlaying = false;
                 this.active = null;
                 this.applyTheme();
@@ -172,7 +168,14 @@
                     const btn = document.createElement('button'); btn.innerText = i; btn.className = 'lvl-btn';
                     if (i <= this.unlockedLvl) {
                         btn.classList.add('unlocked');
-                        btn.onclick = () => { selectedLvl = i; this.initMenu(); this.updateUI(); };
+                        btn.onclick = () => { 
+                            selectedLvl = i; 
+                            const overlay = document.getElementById('overlay');
+                            overlay.querySelectorAll('.temp-btn').forEach(b => b.remove());
+                            document.getElementById('main-start-btn').style.display = 'block';
+                            document.getElementById('m-title').innerText = "GRAMMAR TRAIN";
+                            this.initMenu(); this.updateUI(); 
+                        };
                     }
                     if (i === selectedLvl) btn.classList.add('active');
                     grid.appendChild(btn);
@@ -180,9 +183,7 @@
                 document.getElementById('cur-brains').innerText = this.brains;
             }
 
-            updateUI() {
-                document.getElementById('display-lvl').innerText = selectedLvl;
-            }
+            updateUI() { document.getElementById('display-lvl').innerText = selectedLvl; }
 
             start() {
                 this.isPlaying = true; this.solved = 0; this.active = null;
@@ -194,18 +195,12 @@
             }
 
             spawn() {
-                if (!this.isPlaying) return;
-                if (this.solved >= 10) return this.end(true);
-
+                if (!this.isPlaying || this.solved >= 10) { if(this.solved >= 10) this.end(true); return; }
                 const item = this.wordBank[Math.floor(Math.random() * this.wordBank.length)];
                 const el = document.createElement('div');
-                el.className = 'bubble';
-                el.innerHTML = `<span>OPPOSITE:</span>${item.q}`;
-                el.style.top = (Math.random() * 240 + 30) + "px";
-                el.style.left = "-150px";
+                el.className = 'bubble'; el.innerHTML = `<span>OPPOSITE:</span>${item.q}`;
+                el.style.top = (Math.random() * 240 + 30) + "px"; el.style.left = "-150px";
                 document.getElementById('game-container').appendChild(el);
-                
-                // Speed starts very slow and increases slightly per level
                 const speed = 0.5 + (selectedLvl * 0.03);
                 this.active = { el, x: -150, s: speed, answers: item.a.map(word => word.toLowerCase()) };
             }
@@ -213,8 +208,7 @@
             requestLoop() {
                 if(!this.isPlaying) return;
                 if(this.active) {
-                    this.active.x += this.active.s;
-                    this.active.el.style.left = this.active.x + "px";
+                    this.active.x += this.active.s; this.active.el.style.left = this.active.x + "px";
                     if(this.active.x > document.getElementById('game-container').offsetWidth) return this.end(false);
                 }
                 requestAnimationFrame(() => this.requestLoop());
@@ -222,17 +216,33 @@
 
             end(win) {
                 this.isPlaying = false; if(this.active) this.active.el.remove(); this.active = null;
-                document.getElementById('overlay').style.display = 'flex';
+                const overlay = document.getElementById('overlay');
+                overlay.style.display = 'flex';
+                document.getElementById('main-start-btn').style.display = 'none';
+                overlay.querySelectorAll('.temp-btn').forEach(b => b.remove());
+
                 if(win) {
                     document.getElementById('m-title').innerText = "LEVEL CLEAR!";
                     this.brains += (selectedLvl * 15);
-                    if (selectedLvl === this.unlockedLvl) {
-                        this.unlockedLvl++;
-                        localStorage.setItem('bt_unlocked_grammar', this.unlockedLvl);
-                    }
+                    if (selectedLvl === this.unlockedLvl) { this.unlockedLvl++; localStorage.setItem('bt_unlocked_grammar', this.unlockedLvl); }
                     localStorage.setItem('bt_coins', this.brains);
                     this.initMenu();
-                } else { document.getElementById('m-title').innerText = "GAME OVER"; }
+                    
+                    const nextBtn = document.createElement('button');
+                    nextBtn.className = 'start-btn temp-btn';
+                    nextBtn.innerText = "NEXT LEVEL";
+                    nextBtn.style.marginTop = "10px";
+                    nextBtn.onclick = () => { selectedLvl++; this.initMenu(); this.updateUI(); this.start(); };
+                    overlay.appendChild(nextBtn);
+                } else { 
+                    document.getElementById('m-title').innerText = "GAME OVER"; 
+                    const retryBtn = document.createElement('button');
+                    retryBtn.className = 'start-btn temp-btn';
+                    retryBtn.innerText = "PLAY AGAIN";
+                    retryBtn.style.marginTop = "10px";
+                    retryBtn.onclick = () => this.start();
+                    overlay.appendChild(retryBtn);
+                }
             }
         }
 
@@ -241,18 +251,11 @@
             if(game.isPlaying && game.active) {
                 const typed = e.target.value.toLowerCase().trim();
                 if(game.active.answers.includes(typed)) {
-                    const bubble = game.active.el;
-                    game.active = null;
-                    game.solved++;
+                    const bubble = game.active.el; game.active = null; game.solved++;
                     document.getElementById('count').innerText = game.solved;
                     document.getElementById('ans').classList.add('correct');
                     bubble.style.transform = "scale(0)";
-                    setTimeout(() => {
-                        bubble.remove();
-                        document.getElementById('ans').classList.remove('correct');
-                        e.target.value = ''; 
-                        game.spawn();
-                    }, 150);
+                    setTimeout(() => { bubble.remove(); document.getElementById('ans').classList.remove('correct'); e.target.value = ''; game.spawn(); }, 150);
                 }
             }
         });
