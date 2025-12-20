@@ -39,7 +39,7 @@
         .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .shop-item { width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
         
-        #dev-code { padding: 15px; background: #111; border: 1px solid #333; color: var(--accent); text-align: center; font-family: monospace; outline: none; border-radius: 10px; margin-top: 20px; text-transform: uppercase; }
+        #dev-code { padding: 15px; background: #111; border: 1px solid #333; color: var(--accent); text-align: center; font-family: monospace; outline: none; border-radius: 10px; margin-top: 20px; text-transform: uppercase; width: 250px; }
     </style>
 </head>
 <body>
@@ -170,7 +170,6 @@
             s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        // --- DEV CONSOLE LOGIC ---
         let clickCount = 0;
         let clickTimer;
         document.getElementById('brain-clicker').onclick = function() {
@@ -188,16 +187,30 @@
 
         document.getElementById('dev-code').onkeypress = function(e) {
             if (e.key === 'Enter') {
-                const val = this.value.toUpperCase();
-                if (val === 'GODMODE') { userBrains = 99999; localStorage.setItem('bt_coins', userBrains); updateUI(); }
-                if (val === 'RESET') { localStorage.clear(); location.reload(); }
+                const val = this.value.toUpperCase().trim();
+                
+                if (val === 'GODMODE') { 
+                    userBrains = 99999; 
+                    localStorage.setItem('bt_coins', 99999); 
+                    updateUI(); 
+                    alert("GODMODE ACTIVE");
+                }
+                
+                if (val === 'RESET') { 
+                    localStorage.clear(); 
+                    location.reload(); 
+                }
+                
                 if (val === 'UNLOCK') { 
                     localStorage.setItem('bt_unlocked', 100); 
                     localStorage.setItem('bt_unlocked_dots', 100); 
                     localStorage.setItem('bt_unlocked_grammar', 100); 
+                    alert("ALL LEVELS UNLOCKED");
                     location.reload(); 
                 }
-                this.value = ''; toggleDev();
+                
+                this.value = ''; 
+                toggleDev();
             }
         };
 
