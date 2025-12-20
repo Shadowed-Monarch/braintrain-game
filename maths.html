@@ -3,225 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Math Training</title>
+    <title>Math Speed</title>
     <style>
-        :root { --bg: #000; --accent: #ff0000; --text: #fff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
-        
-        header { width: 100%; padding: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; box-sizing: border-box;}
-        .back-btn { text-decoration: none; color: white; font-weight: bold; border: 1px solid white; padding: 5px 10px; border-radius: 5px; }
-        
-        /* Level Selector Grid */
-        #level-menu { width: 95%; max-width: 800px; height: 80vh; overflow-y: auto; margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .lvl-btn { 
-            width: 60px; height: 60px; background: #222; border: 2px solid #444; color: #fff; 
-            font-size: 1.2rem; font-weight: bold; cursor: pointer; border-radius: 10px;
-        }
-        .lvl-btn.unlocked { border-color: var(--accent); background: #111; }
-        .lvl-btn.unlocked:hover { background: var(--accent); }
-        .lvl-btn.locked { opacity: 0.5; cursor: not-allowed; }
-
-        /* Game Area */
-        #game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
-        #game-container { position: relative; width: 95%; max-width: 850px; height: 400px; background: #111; border: 3px solid var(--accent); border-radius: 10px; overflow: hidden; margin-top: 20px; }
-        .question-bubble { position: absolute; background: var(--accent); color: white; padding: 10px 18px; border-radius: 20px; font-weight: bold; white-space: nowrap; z-index: 5; }
-        
-        #input-area { width: 100%; margin-top: 15px; text-align: center; }
-        input { padding: 12px; font-size: 1.2rem; width: 80%; max-width: 350px; background: #222; color: var(--accent); border: 2px solid var(--accent); border-radius: 8px; outline: none; }
-        
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        #overlay button { background: var(--bg); color: white; border: 2px solid var(--accent); padding: 12px 30px; font-size: 1.1rem; cursor: pointer; border-radius: 8px; margin: 10px; }
-        .hidden { display: none !important; }
-
-        /* Rainbow Text Support */
-        .rainbow-text {
-            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff);
-            background-size: 400% 400%; -webkit-background-clip: text; color: transparent;
-            animation: rainbow-anim 5s ease infinite;
-        }
-        @keyframes rainbow-anim { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        :root { --bg: #000; --accent: #f00; --text: #fff; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        header { width: 100%; padding: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); box-sizing: border-box; align-items: center; }
+        .back-btn { text-decoration: none; color: #fff; border: 1px solid #fff; padding: 5px 10px; border-radius: 5px; font-size: 14px; }
+        #level-menu { width: 95%; max-width: 600px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; overflow-y: auto; height: 80vh; }
+        .lvl-btn { width: 50px; height: 50px; border-radius: 10px; border: 2px solid #444; background: #111; color: #fff; cursor: pointer; font-weight: bold; }
+        .lvl-btn.unlocked { border-color: var(--accent); }
+        .lvl-btn.locked { opacity: 0.3; cursor: not-allowed; }
+        #game-area { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
+        #game-container { position: relative; width: 95%; max-width: 800px; height: 400px; background: #080808; border: 2px solid var(--accent); border-radius: 10px; margin-top: 20px; overflow: hidden; }
+        .bubble { position: absolute; background: var(--accent); padding: 10px 15px; border-radius: 20px; font-weight: bold; white-space: nowrap; }
+        #ans { padding: 15px; width: 80%; max-width: 300px; margin-top: 20px; background: #111; border: 2px solid var(--accent); color: #fff; border-radius: 10px; font-size: 20px; text-align: center; }
+        #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        #overlay button { padding: 10px 30px; background: var(--accent); border: none; color: #fff; font-weight: bold; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <header>
-        <a href="index.html" class="back-btn">⬅ HOME</a>
-        <div id="status-bar">Lvl: <span id="current-lvl-display">-</span> | 🪙 <span id="coin-display">0</span></div>
+        <a href="index.html" class="back-btn">⬅ HUB</a>
+        <div>Lvl: <span id="cur-lvl">-</span> | 🪙 <span id="cur-coins">0</span></div>
     </header>
 
-    <div id="level-menu">
-        </div>
+    <div id="level-menu"></div>
 
-    <div id="game-ui">
+    <div id="game-area">
         <div id="game-container">
-            <div id="overlay" class="hidden">
-                <h2 id="title">READY?</h2>
-                <button onclick="game.startLevel()">START</button>
-                <button onclick="game.exitToMenu()" style="font-size:0.8rem; border-color:#555;">Quit to Menu</button>
+            <div id="overlay">
+                <h2 id="title">LEVEL 1</h2>
+                <button onclick="game.start()">START</button>
             </div>
         </div>
-        <div id="input-area"><input type="number" id="ans" placeholder="Answer..." autocomplete="off"></div>
+        <input type="number" id="ans" placeholder="Answer..." autocomplete="off">
     </div>
 
     <script>
         class MathGame {
             constructor() {
-                this.maxLevel = parseInt(localStorage.getItem('bt_math_max_lvl')) || 1;
+                this.max = parseInt(localStorage.getItem('bt_math_max_lvl')) || 1;
                 this.coins = parseInt(localStorage.getItem('bt_coins')) || 0;
-                this.currentSkin = localStorage.getItem('bt_current_skin') || 'red';
-                
-                this.activeLevel = 1;
-                this.isPlaying = false;
-                this.active = [];
-                this.count = 0;
-                
-                this.applySkin();
-                this.renderMenu();
-                this.updateHud();
+                this.skin = localStorage.getItem('bt_current_skin') || 'red';
+                this.active = []; this.isPlaying = false; this.count = 0;
+                this.applyTheme(); this.renderMenu();
+                document.getElementById('cur-coins').innerText = this.coins;
             }
-
-            applySkin() {
-                const colors = { red:'#ff0000', blue:'#0088ff', yellow:'#ffcc00', green:'#00ff00', purple:'#9900ff', cyan:'#00ffff' };
-                if(this.currentSkin === 'rainbow') {
-                    document.documentElement.style.setProperty('--accent', 'white'); // Fallback
-                    // In a real app, you'd add complex CSS class toggling here for elements
-                } else {
-                    document.documentElement.style.setProperty('--accent', colors[this.currentSkin] || '#ff0000');
-                }
+            applyTheme() {
+                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f', cyan:'#0ff'};
+                document.documentElement.style.setProperty('--accent', c[this.skin] || '#fff');
             }
-
             renderMenu() {
-                const menu = document.getElementById('level-menu');
-                menu.innerHTML = '';
-                // Render levels up to max + a buffer to show future
-                for(let i = 1; i <= this.maxLevel + 1; i++) {
-                    const btn = document.createElement('button');
-                    btn.className = 'lvl-btn';
-                    btn.innerText = i;
-                    if(i <= this.maxLevel) {
-                        btn.classList.add('unlocked');
-                        btn.onclick = () => this.selectLevel(i);
-                    } else {
-                        btn.classList.add('locked');
-                    }
-                    menu.appendChild(btn);
+                const m = document.getElementById('level-menu'); m.innerHTML = '';
+                for(let i=1; i<=this.max+1; i++) {
+                    const b = document.createElement('button'); b.className = 'lvl-btn'; b.innerText = i;
+                    if(i <= this.max) { b.classList.add('unlocked'); b.onclick = () => this.select(i); }
+                    else b.classList.add('locked');
+                    m.appendChild(b);
                 }
             }
-
-            selectLevel(lvl) {
-                this.activeLevel = lvl;
-                document.getElementById('level-menu').style.display = 'none';
-                document.getElementById('game-ui').style.display = 'flex';
-                document.getElementById('current-lvl-display').innerText = lvl;
-                document.getElementById('overlay').classList.remove('hidden');
-                document.getElementById('title').innerText = `LEVEL ${lvl}`;
-                document.getElementById('ans').value = '';
+            select(l) {
+                this.lvl = l; document.getElementById('level-menu').style.display = 'none';
+                document.getElementById('game-area').style.display = 'flex';
+                document.getElementById('cur-lvl').innerText = l;
+                document.getElementById('title').innerText = "LEVEL " + l;
             }
-
-            exitToMenu() {
-                this.isPlaying = false;
-                clearInterval(this.spawnInt);
-                document.getElementById('game-ui').style.display = 'none';
-                document.getElementById('level-menu').style.display = 'flex';
-                this.renderMenu();
+            start() {
+                this.isPlaying = true; this.count = 0; this.active = [];
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('ans').focus(); document.getElementById('ans').value = '';
+                this.loop(); 
+                this.spawnInt = setInterval(() => {
+                    if(this.active.length + this.count < 10) this.spawn();
+                }, Math.max(800, 2000 - (this.lvl*50)));
             }
-
-            startLevel() {
-                this.isPlaying = true;
-                this.count = 0;
-                this.active = [];
-                document.getElementById('overlay').classList.add('hidden');
-                document.getElementById('game-container').querySelectorAll('.question-bubble').forEach(e => e.remove());
-                document.getElementById('ans').focus();
-                
-                this.loop();
-                // Spawn rate gets slightly faster per level, capped at 800ms
-                let spawnRate = Math.max(800, 2500 - (this.activeLevel * 50));
-                this.spawnInt = setInterval(() => this.spawn(), spawnRate);
-            }
-
             spawn() {
-                if(!this.isPlaying || this.count + this.active.length >= 10) return;
-                
-                // Difficulty Math
-                const range = 5 + (this.activeLevel * 2); 
-                const a = Math.floor(Math.random() * range) + 1;
-                const b = Math.floor(Math.random() * range) + 1;
-                
-                const el = document.createElement('div');
-                el.className = 'question-bubble';
-                el.innerText = `${a} + ${b}`;
-                el.style.top = (Math.random() * 300 + 30) + 'px';
-                if(this.currentSkin === 'rainbow') el.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
-                
-                document.getElementById('game-container').appendChild(el);
-                
-                // SPEED: Base 0.5 + (Level * 0.1). User cannot control this.
-                let speed = 0.5 + (this.activeLevel * 0.15);
-                
-                this.active.push({ el, x: -100, speed, a: (a+b).toString() });
+                const a = Math.floor(Math.random()*(5+this.lvl)), b = Math.floor(Math.random()*(5+this.lvl));
+                const el = document.createElement('div'); el.className = 'bubble'; el.innerText = `${a}+${b}`;
+                el.style.top = (Math.random()*300+20)+'px'; document.getElementById('game-container').appendChild(el);
+                this.active.push({ el, x: -100, speed: 0.6 + (this.lvl*0.15), ans: (a+b).toString() });
             }
-
             loop() {
                 if(!this.isPlaying) return;
-                this.active.forEach((ent, i) => {
-                    ent.x += ent.speed;
-                    ent.el.style.transform = `translateX(${ent.x}px)`;
-                    if(ent.x > 850) this.end('FAIL');
+                this.active.forEach(ent => {
+                    ent.x += ent.speed; ent.el.style.transform = `translateX(${ent.x}px)`;
+                    if(ent.x > 800) this.end('FAIL');
                 });
                 requestAnimationFrame(() => this.loop());
             }
-
-            end(txt) {
-                this.isPlaying = false;
-                clearInterval(this.spawnInt);
-                document.getElementById('overlay').classList.remove('hidden');
-                document.getElementById('title').innerText = txt;
-                
-                if(txt === 'SUCCESS') {
-                    // Logic for unlocking next level
-                    if(this.activeLevel === this.maxLevel) {
-                        this.maxLevel++;
-                        localStorage.setItem('bt_math_max_lvl', this.maxLevel);
-                    }
-                    
-                    // COIN LOGIC
-                    let reward = 10; // Standard reward
-                    if(this.activeLevel === 1 && this.maxLevel === 2) reward = 100; // First time finishing lvl 1
-                    if(this.activeLevel % 10 === 0) reward = 100; // Milestone level
-                    
-                    this.coins += reward;
-                    localStorage.setItem('bt_coins', this.coins);
-                    this.updateHud();
-                    
-                    const btn = document.querySelector('#overlay button');
-                    btn.innerText = "NEXT LEVEL";
-                    btn.onclick = () => {
-                        this.activeLevel++;
-                        this.selectLevel(this.activeLevel);
-                        // Small hack to auto start next level
-                        setTimeout(() => this.startLevel(), 100);
-                    };
+            end(res) {
+                this.isPlaying = false; clearInterval(this.spawnInt);
+                const o = document.getElementById('overlay'); o.style.display = 'flex';
+                document.getElementById('title').innerText = res;
+                if(res === 'SUCCESS') {
+                    if(this.lvl === this.max) { this.max++; localStorage.setItem('bt_math_max_lvl', this.max); }
+                    let reward = (this.lvl === 1 && this.max === 2) || this.lvl % 10 === 0 ? 100 : 10;
+                    this.coins += reward; localStorage.setItem('bt_coins', this.coins);
+                    document.getElementById('cur-coins').innerText = this.coins;
+                    o.querySelector('button').innerText = "NEXT LEVEL";
+                    o.querySelector('button').onclick = () => { this.select(this.lvl+1); this.start(); };
                 } else {
-                    const btn = document.querySelector('#overlay button');
-                    btn.innerText = "RETRY";
-                    btn.onclick = () => this.startLevel();
+                    o.querySelector('button').innerText = "RETRY";
+                    o.querySelector('button').onclick = () => this.start();
                 }
             }
-
-            updateHud() {
-                document.getElementById('coin-display').innerText = this.coins;
-            }
         }
-
         const game = new MathGame();
         document.getElementById('ans').addEventListener('input', (e) => {
-            const idx = game.active.findIndex(ent => ent.a === e.target.value);
-            if(idx !== -1) {
-                game.active[idx].el.remove();
-                game.active.splice(idx, 1);
-                e.target.value = '';
-                game.count++;
+            const i = game.active.findIndex(ent => ent.ans === e.target.value);
+            if(i !== -1) {
+                game.active[i].el.remove(); game.active.splice(i, 1);
+                game.count++; e.target.value = '';
                 if(game.count >= 10) game.end('SUCCESS');
             }
         });
