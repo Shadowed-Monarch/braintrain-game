@@ -10,7 +10,7 @@
         header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
         .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
         #game-container { position: relative; width: 95%; max-width: 800px; height: 450px; background: #080808; border: 2px solid var(--accent); border-radius: 15px; margin-top: 10px; overflow: hidden; cursor: crosshair; }
-        .dot { position: absolute; width: 45px; height: 45px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; user-select: none; box-shadow: 0 0 10px var(--accent); z-index: 5; transition: opacity 0.2s, transform 0.2s; }
+        .dot { position: absolute; width: 50px; height: 50px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; user-select: none; box-shadow: 0 0 10px var(--accent); z-index: 5; transition: transform 0.2s; }
         #timer-bar { position: absolute; bottom: 0; left: 0; height: 6px; background: var(--accent); width: 100%; transition: width 0.1s linear; }
         #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
         .level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-height: 200px; overflow-y: auto; margin: 15px 0; padding: 10px; width: 100%; }
@@ -40,8 +40,13 @@
             constructor() {
                 this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
                 this.unlockedLvl = parseInt(localStorage.getItem('bt_unlocked_dots')) || 1;
-                this.initMenu();
                 this.applyTheme();
+                this.initMenu();
+            }
+            applyTheme() {
+                const skinID = localStorage.getItem('bt_current_skin') || 'red';
+                const colors = { red:'#ff0000', blue:'#0088ff', yellow:'#ffcc00', green:'#00ff00', purple:'#9900ff' };
+                document.documentElement.style.setProperty('--accent', colors[skinID] || '#ff0000');
             }
             initMenu() {
                 const grid = document.getElementById('lvl-grid'); grid.innerHTML = '';
@@ -56,15 +61,10 @@
                 }
                 document.getElementById('cur-brains').innerText = this.brains;
             }
-            applyTheme() {
-                const skin = localStorage.getItem('bt_current_skin') || 'red';
-                const c = {red:'#f00', blue:'#08f', yellow:'#fc0', green:'#0f0', purple:'#90f'};
-                document.documentElement.style.setProperty('--accent', c[skin] || '#f00');
-            }
             start() {
                 this.isPlaying = true; this.cur = 1;
-                this.dotsToSpawn = 4 + selectedLvl;
-                this.maxTime = 5 + (this.dotsToSpawn * 0.4); 
+                this.dotsToSpawn = Math.min(4 + selectedLvl, 35); // Max 35 dots to avoid crowding
+                this.maxTime = 5 + (this.dotsToSpawn * 0.5);
                 this.timeLeft = this.maxTime;
                 document.getElementById('overlay').style.display = 'none';
                 this.spawnDots();
@@ -79,47 +79,47 @@
             spawnDots() {
                 const container = document.getElementById('game-container');
                 container.querySelectorAll('.dot').forEach(d => d.remove());
-                const placedDots = [];
+                const placed = [];
+                const dotSize = 60; // Size + padding for distance checking
 
                 for(let i=1; i<=this.dotsToSpawn; i++) {
-                    let x, y, overlapping;
+                    let x, y, tooClose;
                     let attempts = 0;
 
-                    // Try to find a spot that doesn't overlap
                     do {
-                        overlapping = false;
-                        x = Math.random() * (container.offsetWidth - 60) + 5;
-                        y = Math.random() * (container.offsetHeight - 70) + 5;
-                        attempts++;
-
-                        for(let dot of placedDots) {
-                            const dist = Math.hypot(x - dot.x, y - dot.y);
-                            if(dist < 60) { // Check if dots are closer than 60px
-                                overlapping = true;
+                        tooClose = false;
+                        // Keep dots away from the very edges
+                        x = Math.random() * (container.offsetWidth - 70) + 10;
+                        y = Math.random() * (container.offsetHeight - 80) + 10;
+                        
+                        // Check distance from EVERY dot already placed
+                        for(let p of placed) {
+                            const dx = x - p.x;
+                            const dy = y - p.y;
+                            const distance = Math.sqrt(dx*dx + dy*dy);
+                            if(distance < dotSize) {
+                                tooClose = true;
                                 break;
                             }
                         }
-                        // Safety break to prevent infinite loop on very high levels
-                        if(attempts > 100) break; 
-                    } while(overlapping);
+                        attempts++;
+                        if(attempts > 200) break; // Safety break
+                    } while(tooClose);
 
-                    placedDots.push({x, y});
+                    placed.push({x, y});
 
-                    const d = document.createElement('div'); 
-                    d.className = 'dot'; 
+                    const d = document.createElement('div');
+                    d.className = 'dot';
                     d.innerText = i;
                     d.style.left = x + "px";
                     d.style.top = y + "px";
-                    
                     d.onclick = () => {
                         if(parseInt(d.innerText) === this.cur) {
                             d.style.transform = "scale(0)";
-                            setTimeout(() => d.remove(), 200);
+                            setTimeout(() => d.remove(), 150);
                             this.cur++;
                             if(this.cur > this.dotsToSpawn) this.end(true);
-                        } else { 
-                            this.end(false); 
-                        }
+                        } else { this.end(false); }
                     };
                     container.appendChild(d);
                 }
@@ -136,9 +136,7 @@
                     }
                     localStorage.setItem('bt_coins', this.brains);
                     document.getElementById('m-title').innerText = "WELL DONE!";
-                } else { 
-                    document.getElementById('m-title').innerText = "FAILED!"; 
-                }
+                } else { document.getElementById('m-title').innerText = "FAILED!"; }
                 this.initMenu();
             }
         }
