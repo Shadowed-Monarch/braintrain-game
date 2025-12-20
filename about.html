@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Brain Train</title>
+    <style>
+        :root { --bg: #000; --panel: #0a0a0a; --accent: #ff0000; --brain: #ff77ff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box;}
+        
+        header { width: 100%; max-width: 800px; display: flex; justify-content: flex-start; margin-bottom: 40px; }
+        .back-btn { color: white; text-decoration: none; border: 1px solid #333; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; transition: 0.3s; }
+        .back-btn:hover { border-color: var(--accent); background: var(--accent); }
+
+        .content-wrap { max-width: 700px; width: 100%; }
+        h1 { font-size: 2.5rem; letter-spacing: 3px; margin-bottom: 10px; }
+        h1 span { color: var(--accent); }
+        
+        .section { background: var(--panel); border: 1px solid #1a1a1a; padding: 25px; border-radius: 20px; margin-bottom: 20px; }
+        h2 { color: var(--accent); font-size: 1.2rem; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+        p { color: #aaa; line-height: 1.6; }
+
+        .rank-list { list-style: none; padding: 0; }
+        .rank-list li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1a1a1a; }
+        .rank-list li:last-child { border: none; }
+        .rank-name { font-weight: bold; }
+        .rank-val { color: var(--brain); }
+
+        .footer { margin-top: 40px; color: #444; font-size: 0.8rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">← BACK TO HUB</a>
+    </header>
+
+    <div class="content-wrap">
+        <h1>ABOUT <span>TRAIN</span></h1>
+        
+        <div class="section">
+            <h2>THE MISSION</h2>
+            <p>Brain Train is designed to sharpen your cognitive reflexes, mathematical speed, and linguistic accuracy. By engaging in daily "trainings," you build <b>Brain Power (BP)</b>, which determines your global rank.</p>
+        </div>
+
+        <div class="section">
+            <h2>HOW IT WORKS</h2>
+            <p>🧠 <b>Games:</b> Choose between Math (Speed Calculation), Grammar (Opposite Recognition), or Dots (Visual Reflexes).</p>
+            <p>📈 <b>Progression:</b> Each game features 100 levels. As the level increases, the speed and difficulty scale up.</p>
+            <p>🎨 <b>Customization:</b> Use your earned Brains in the Skin Shop to unlock new theme colors that apply to the entire platform.</p>
+        </div>
+
+        <div class="section">
+            <h2>RANKING SYSTEM</h2>
+            <ul class="rank-list">
+                <li><span class="rank-name">🎓 STUDENT</span> <span class="rank-val">0 - 499 🧠</span></li>
+                <li><span class="rank-name">📜 SCHOLAR</span> <span class="rank-val">500 - 1,999 🧠</span></li>
+                <li><span class="rank-name">💡 GENIUS</span> <span class="rank-val">2,000 - 4,999 🧠</span></li>
+                <li><span class="rank-name">👑 MASTERMIND</span> <span class="rank-val">5,000 - 9,999 🧠</span></li>
+                <li><span class="rank-name">🌌 OVERLORD</span> <span class="rank-val">10,000+ 🧠</span></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>DATA STORAGE</h2>
+            <p>Your progress, unlocked levels, and purchased skins are saved locally in your browser. Clearing your browser cache will reset your progress.</p>
+        </div>
+
+        <div class="footer">
+            BRAIN TRAIN v1.0 <br> Developed for Cognitive Excellence
+        </div>
+    </div>
+
+    <script>
+        // Apply the user's current skin color to the about page
+        const currentSkin = localStorage.getItem('bt_current_skin') || 'red';
+        const colors = { red:'#ff0000', blue:'#0088ff', yellow:'#ffcc00', green:'#00ff00', purple:'#9900ff' };
+        document.documentElement.style.setProperty('--accent', colors[currentSkin]);
+    </script>
+</body>
+</html>
