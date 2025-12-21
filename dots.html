@@ -45,6 +45,14 @@
     </div>
 
     <script>
+        if (window.CSS && CSS.registerProperty) {
+        CSS.registerProperty({
+            name: '--accent',
+            syntax: '<color>',
+            inherits: true,
+            initialValue: '#ff0000'
+        });
+    }
         let selectedLvl = 1;
 
         class DotGame {
