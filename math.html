@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maths Train</title>
+    <script src="theme.js"></script>
     <style>
-        :root { --bg: #050505; --accent: #f00; --brain: #ff77ff; }
+        :root { --bg: #000; --accent: #f00; --brain: #ff77ff; }
 
         @keyframes rainbow-glow { 
             0%{--accent:#f00} 20%{--accent:#ff0} 40%{--accent:#0f0} 
@@ -51,23 +52,12 @@
                 this.unlockedLvl = parseInt(localStorage.getItem('bt_unlocked')) || 1;
                 this.isPlaying = false;
                 this.active = null;
-                this.applyTheme();
+                
+                // Use the global theme instead of writing colors here
+                if (typeof applyGlobalTheme === 'function') applyGlobalTheme();
+                
                 this.initMenu();
                 this.updateUI();
-            }
-            applyTheme() {
-                const savedSkin = localStorage.getItem('bt_current_skin') || 'red';
-                const skinColors = {
-                    'red': '#ff0000', 'blue': '#0088ff', 'yellow': '#ffcc00', 
-                    'green': '#00ff00', 'cyan': '#00ffff', 'pink': '#ff00ff', 
-                    'purple': '#9900ff', 'orange': '#ff6600', 'gold': '#ffd700'
-                };
-                if(savedSkin === 'rainbow') {
-                    document.documentElement.style.animation = "rainbow-glow 5s infinite linear";
-                } else {
-                    document.documentElement.style.animation = "none";
-                    document.documentElement.style.setProperty('--accent', skinColors[savedSkin] || '#ff0000');
-                }
             }
             updateUI() {
                 document.getElementById('cur-brains').innerText = this.brains;
@@ -129,12 +119,14 @@
                 overlay.style.display = 'flex';
                 document.getElementById('main-start-btn').style.display = 'none';
                 overlay.querySelectorAll('.temp-btn').forEach(b => b.remove());
+
                 if(win) {
                     document.getElementById('m-title').innerText = "LEVEL CLEAR!";
                     this.brains += (selectedLvl * 10);
                     if (selectedLvl === this.unlockedLvl) { this.unlockedLvl++; localStorage.setItem('bt_unlocked', this.unlockedLvl); }
                     localStorage.setItem('bt_coins', this.brains); 
                     this.initMenu(); this.updateUI();
+
                     const nextBtn = document.createElement('button');
                     nextBtn.className = 'start-btn temp-btn';
                     nextBtn.innerText = "NEXT LEVEL";
