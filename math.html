@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maths Train</title>
     <style>
-        :root { --bg: #000; --accent: #f00; --brain: #ff77ff; }
+        :root { --bg: #050505; --accent: #f00; --brain: #ff77ff; }
+
+        @keyframes rainbow-glow { 
+            0%{--accent:#f00} 20%{--accent:#ff0} 40%{--accent:#0f0} 
+            60%{--accent:#0ff} 80%{--accent:#90f} 100%{--accent:#f00} 
+        }
+
         body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
         header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: #050505; box-sizing: border-box; }
         .brain-wrap { display: flex; align-items: center; gap: 8px; color: var(--brain); font-weight: bold; }
@@ -50,9 +56,18 @@
                 this.updateUI();
             }
             applyTheme() {
-                const skinID = localStorage.getItem('bt_current_skin') || 'red';
-                const colors = { red:'#ff0000', blue:'#0088ff', yellow:'#ffcc00', green:'#00ff00', purple:'#9900ff' };
-                document.documentElement.style.setProperty('--accent', colors[skinID] || '#ff0000');
+                const savedSkin = localStorage.getItem('bt_current_skin') || 'red';
+                const skinColors = {
+                    'red': '#ff0000', 'blue': '#0088ff', 'yellow': '#ffcc00', 
+                    'green': '#00ff00', 'cyan': '#00ffff', 'pink': '#ff00ff', 
+                    'purple': '#9900ff', 'orange': '#ff6600', 'gold': '#ffd700'
+                };
+                if(savedSkin === 'rainbow') {
+                    document.documentElement.style.animation = "rainbow-glow 5s infinite linear";
+                } else {
+                    document.documentElement.style.animation = "none";
+                    document.documentElement.style.setProperty('--accent', skinColors[savedSkin] || '#ff0000');
+                }
             }
             updateUI() {
                 document.getElementById('cur-brains').innerText = this.brains;
@@ -114,14 +129,12 @@
                 overlay.style.display = 'flex';
                 document.getElementById('main-start-btn').style.display = 'none';
                 overlay.querySelectorAll('.temp-btn').forEach(b => b.remove());
-
                 if(win) {
                     document.getElementById('m-title').innerText = "LEVEL CLEAR!";
                     this.brains += (selectedLvl * 10);
                     if (selectedLvl === this.unlockedLvl) { this.unlockedLvl++; localStorage.setItem('bt_unlocked', this.unlockedLvl); }
                     localStorage.setItem('bt_coins', this.brains); 
                     this.initMenu(); this.updateUI();
-
                     const nextBtn = document.createElement('button');
                     nextBtn.className = 'start-btn temp-btn';
                     nextBtn.innerText = "NEXT LEVEL";
