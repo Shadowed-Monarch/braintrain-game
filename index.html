@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrainTrain Game</title>
+    <title>Brain Train Hub</title>
     <style>
-
         @property --accent {
             syntax: '<color>';
             initial-value: #ff0000;
@@ -16,7 +15,7 @@
             --bg: #050505;
             --card: #111;
             --brain: #ff77ff;
-            --accent: #ff0000; /* Default Color */
+            --accent: #ff0000;
         }
 
         @keyframes rainbow-loop {
@@ -31,7 +30,6 @@
         .rainbow-active {
             animation: rainbow-loop 5s infinite linear !important;
         }
-
 
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -52,6 +50,34 @@
             justify-content: space-between;
             align-items: center;
             box-sizing: border-box;
+        }
+
+        .hero { 
+            text-align: center; 
+            margin: 20px 0 40px 0; 
+        }
+        
+        .hero h1 { 
+            font-size: 3rem; 
+            margin: 0; 
+            letter-spacing: 4px; 
+            font-weight: 900; 
+        }
+        
+        .hero p { 
+            color: #666; 
+            letter-spacing: 2px; 
+            margin-top: 5px; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+        }
+        
+        .dev-credit { 
+            font-size: 0.7rem; 
+            color: #444; 
+            margin-top: 10px; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
         }
 
         .brain-display {
@@ -133,7 +159,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.95);
-            display: none; /* Hidden by default */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -187,6 +213,12 @@
         </div>
     </header>
 
+    <div class="hero">
+        <h1>BRAIN TRAIN</h1>
+        <p>Master your mind speed.</p>
+        <div class="dev-credit">DEVELOPED BY SHADOWED</div>
+    </div>
+
     <div class="rank-container">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px;">
             <span id="rank-icon" style="font-size:1.5rem;">🎓</span>
@@ -228,7 +260,6 @@
     </div>
 
     <script>
-
         const colors = [
             {id:'red', hex:'#ff0000', cost:0},
             {id:'blue', hex:'#0088ff', cost:500},
@@ -249,7 +280,6 @@
             { name: "Mastermind", min: 5000, icon: "👑" },
             { name: "Overlord", min: 10000, icon: "🌌" }
         ];
-
 
         let userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
         let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red'];
@@ -293,14 +323,14 @@
             if(overlay.style.display === 'flex') {
                 overlay.style.display = 'none';
             } else {
-                renderShop(); // Draw shop before showing
+                renderShop();
                 overlay.style.display = 'flex';
             }
         }
 
         function renderShop() {
             const grid = document.getElementById('shop-grid');
-            grid.innerHTML = ''; // Clear old items
+            grid.innerHTML = '';
 
             colors.forEach(c => {
                 const el = document.createElement('div');
@@ -314,8 +344,8 @@
                     el.onclick = () => {
                         currentSkin = c.id;
                         localStorage.setItem('bt_current_skin', c.id);
-                        updateUI(); 
-                        renderShop(); 
+                        updateUI();
+                        renderShop();
                     };
                 } else {
                     el.innerHTML = `<span style="font-size:10px; font-weight:bold; color:${['yellow','cyan','gold','rainbow'].includes(c.id) ? 'black' : 'white'}">${c.cost}</span>`;
@@ -369,7 +399,6 @@
                 document.getElementById('dev-console').style.display = 'none';
             }
         };
-
 
         window.onload = updateUI;
         window.onfocus = updateUI; 
