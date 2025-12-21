@@ -36,8 +36,36 @@
         #shop-btn:hover { border-color: var(--accent); color: #fff; }
 
         #shop-overlay, #dev-console { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .shop-item { width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+     .shop-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 12px; 
+    max-height: 300px; 
+    overflow-y: auto; 
+    padding: 10px;
+}
+
+.shop-item { 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    border: 3px solid transparent; 
+    transition: 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.shop-item:hover {
+    transform: scale(1.1);
+    border-color: rgba(255,255,255,0.5);
+}
+
+
+.shop-item[style*="background: rgb(255, 215, 0)"] {
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
         
         #dev-code { padding: 15px; background: #111; border: 1px solid #333; color: var(--accent); text-align: center; font-family: monospace; outline: none; border-radius: 10px; margin-top: 20px; text-transform: uppercase; width: 250px; }
     </style>
@@ -106,13 +134,18 @@
         let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red'];
         let currentSkin = localStorage.getItem('bt_current_skin') || 'red';
 
-        const colors = [
-            {id:'red', hex:'#ff0000', cost:0},
-            {id:'blue', hex:'#0088ff', cost:500},
-            {id:'yellow', hex:'#ffcc00', cost:1000},
-            {id:'green', hex:'#00ff00', cost:2000},
-            {id:'purple', hex:'#9900ff', cost:5000}
-        ];
+const colors = [
+{id:'red', hex:'#ff0000', cost:0},
+    {id:'blue', hex:'#0088ff', cost:500},
+    {id:'yellow', hex:'#ffcc00', cost:1000},
+    {id:'green', hex:'#00ff00', cost:2000},
+    {id:'cyan', hex:'#00ffff', cost:3500},       
+    {id:'pink', hex:'#ff00ff', cost:5000},       
+    {id:'purple', hex:'#9900ff', cost:7500},
+    {id:'orange', hex:'#ff6600', cost:10000},  
+    {id:'gold', hex:'#ffd700', cost:25000},
+    {id:'rainbow', hex:'linear-gradient(45deg, #ff0000, #ffcc00, #00ff00, #0088ff, #9900ff)', cost:50000}
+];
 
         const ranks = [
             { name: "Student", min: 0, icon: "🎓" },
