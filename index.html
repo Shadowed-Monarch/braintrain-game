@@ -11,21 +11,25 @@
             inherits: true;
         }
 
-:root[data-theme="dark"] {
-    --bg: #050505;
-    --card: #111;
-    --text: #ffffff;
-    --subtext: #666;
-    --border: #333;
-}
+        :root[data-theme="dark"] {
+            --bg: #050505;
+            --card: #111;
+            --text: #ffffff;
+            --subtext: #666;
+            --border: #333;
+            --overlay: rgba(0,0,0,0.95);
+            --shadow-color: var(--accent);
+        }
 
-:root[data-theme="light"] {
-    --bg: #f5f5f5;
-    --card: #ffffff;
-    --text: #000000;
-    --subtext: #555;
-    --border: #ddd;
-}
+        :root[data-theme="light"] {
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #000000;
+            --subtext: #555;
+            --border: #ddd;
+            --overlay: rgba(255,255,255,0.95);
+            --shadow-color: transparent;
+        }
 
         @keyframes rainbow-loop {
             0% { --accent: #ff0000; }
@@ -40,16 +44,16 @@
             animation: rainbow-loop 5s infinite linear !important;
         }
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-}
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
         header {
             width: 100%;
@@ -59,6 +63,20 @@ body {
             justify-content: space-between;
             align-items: center;
             box-sizing: border-box;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            gap: 10px;
+        }
+
+        .site-logo {
+            height: 40px;
+            width: auto;
         }
 
         .hero { 
@@ -71,6 +89,7 @@ body {
             margin: 0; 
             letter-spacing: 4px; 
             font-weight: 900; 
+            text-shadow: 0 0 15px var(--shadow-color);
         }
         
         .hero p { 
@@ -83,7 +102,7 @@ body {
         
         .dev-credit { 
             font-size: 0.7rem; 
-            color: #444; 
+            color: var(--subtext); 
             margin-top: 10px; 
             letter-spacing: 1px; 
             text-transform: uppercase; 
@@ -117,7 +136,7 @@ body {
         .progress-bar {
             width: 100%;
             height: 10px;
-            background: #222;
+            background: var(--border);
             border-radius: 5px;
             margin-top: 15px;
             overflow: hidden;
@@ -128,7 +147,7 @@ body {
             background: var(--accent);
             width: 0%;
             transition: width 0.5s ease;
-            box-shadow: 0 0 10px var(--accent);
+            box-shadow: 0 0 10px var(--shadow-color);
         }
 
         .game-grid {
@@ -157,6 +176,7 @@ body {
             border-color: var(--accent);
             transform: translateY(-5px);
             background: var(--card);
+            box-shadow: 0 0 15px var(--shadow-color);
         }
 
         .game-card img {
@@ -167,7 +187,7 @@ body {
         #shop-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.95);
+            background: var(--overlay);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -195,41 +215,35 @@ body {
         }
 
         .shop-item:hover { transform: scale(1.1); }
-        .shop-item.selected { border-color: white; box-shadow: 0 0 15px white; }
+        .shop-item.selected { border-color: var(--text); box-shadow: 0 0 15px var(--text); }
 
         #dev-console {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background: #111;
+            background: var(--card);
             padding: 20px;
             display: none;
             justify-content: center;
             border-top: 2px solid var(--accent);
             z-index: 2000;
         }
-
-        .site-logo {
-            height: 40px;
-            width: auto;
-            margin-right: 10px;
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="display: flex; align-items: center; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px;">
+        <div class="logo-area">
             <img src="logo.png" alt="" class="site-logo">
-            Brain<span style="color:var(--accent)">Train</span> Game
+            Brain<span style="color:var(--accent)">Train</span>
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
-        <button onclick="toggleLightDark()" id="td-toggle" style="background:none; border:1px solid var(--border); color:var(--text); cursor:pointer; padding:5px 10px; border-radius:15px;">🌓</button>
-        <div class="brain-display" id="brain-clicker">
-            <span>🧠</span>
-            <span id="brains">0</span>
+            <button onclick="toggleLightDark()" style="background:none; border:1px solid var(--border); color:var(--text); cursor:pointer; padding:5px 10px; border-radius:15px; font-size: 1.2rem;">🌓</button>
+            <div class="brain-display" id="brain-clicker">
+                <span>🧠</span>
+                <span id="brains">0</span>
+            </div>
         </div>
-             </div>
     </header>
 
     <div class="hero">
@@ -244,7 +258,7 @@ body {
             <span id="rank-name" style="font-weight:bold; font-size:1.2rem; color:var(--accent)">STUDENT</span>
         </div>
         <div class="progress-bar"><div id="rank-progress"></div></div>
-        <div id="next-rank-info" style="color:#666; font-size:0.8rem; margin-top:10px;"></div>
+        <div id="next-rank-info" style="color:var(--subtext); font-size:0.8rem; margin-top:10px;"></div>
     </div>
 
     <div class="game-grid">
@@ -262,20 +276,20 @@ body {
         </a>
     </div>
 
-    <button onclick="toggleShop()" style="margin-top:40px; padding:12px 30px; font-weight:bold; background:#111; color:white; border:2px solid var(--accent); border-radius:25px; cursor:pointer;">
+    <button onclick="toggleShop()" style="margin-top:40px; padding:12px 30px; font-weight:bold; background:var(--card); color:var(--text); border:2px solid var(--accent); border-radius:25px; cursor:pointer;">
         🎨 OPEN SKIN SHOP
     </button>
     
-    <a href="about.html" style="color:#444; text-decoration:none; font-size:0.8rem; margin:20px 0 40px 0;">ABOUT BRAIN TRAIN</a>
+    <a href="about.html" style="color:var(--subtext); text-decoration:none; font-size:0.8rem; margin:20px 0 40px 0;">ABOUT BRAIN TRAIN</a>
 
     <div id="shop-overlay">
-        <h2 style="color:white; margin-bottom:30px;">CHOOSE SKIN</h2>
+        <h2 style="color:var(--text); margin-bottom:30px;">CHOOSE SKIN</h2>
         <div class="shop-grid" id="shop-grid"></div>
-        <button onclick="toggleShop()" style="padding:10px 20px; cursor:pointer; background:white; border:none; border-radius:5px;">CLOSE</button>
+        <button onclick="toggleShop()" style="padding:10px 20px; cursor:pointer; background:var(--text); color:var(--bg); border:none; border-radius:5px;">CLOSE</button>
     </div>
 
     <div id="dev-console">
-        <input type="text" id="dev-code" placeholder="ENTER CODE" style="padding:10px; width:200px; text-align:center;">
+        <input type="text" id="dev-code" placeholder="ENTER CODE" style="padding:10px; width:200px; text-align:center; background:var(--bg); color:var(--text); border:1px solid var(--border);">
     </div>
 
     <script>
@@ -348,12 +362,13 @@ body {
                 overlay.style.display = 'flex';
             }
         }
+
         function toggleLightDark() {
-    const currentMode = localStorage.getItem('bt_mode') || 'dark';
-    const newMode = currentMode === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('bt_mode', newMode);
-    updateUI();
-}
+            const currentMode = localStorage.getItem('bt_mode') || 'dark';
+            const newMode = currentMode === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('bt_mode', newMode);
+            updateUI();
+        }
 
         function renderShop() {
             const grid = document.getElementById('shop-grid');
