@@ -11,23 +11,21 @@
             inherits: true;
         }
 
-        :root[data-theme="dark"] {
-            --bg: #050505;
-            --card: #111;
-            --text: #ffffff;
-            --subtext: #888;
-            --border: #333;
-            --overlay: rgba(0,0,0,0.95);
-        }
+:root[data-theme="dark"] {
+    --bg: #050505;
+    --card: #111;
+    --text: #ffffff;
+    --subtext: #666;
+    --border: #333;
+}
 
-        :root[data-theme="light"] {
-            --bg: #f0f0f0;
-            --card: #ffffff;
-            --text: #000000;
-            --subtext: #555;
-            --border: #ccc;
-            --overlay: rgba(255,255,255,0.95);
-        }
+:root[data-theme="light"] {
+    --bg: #f5f5f5;
+    --card: #ffffff;
+    --text: #000000;
+    --subtext: #555;
+    --border: #ddd;
+}
 
         @keyframes rainbow-loop {
             0% { --accent: #ff0000; }
@@ -42,17 +40,16 @@
             animation: rainbow-loop 5s infinite linear !important;
         }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            transition: background 0.3s, color 0.3s;
-        }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
 
         header {
             width: 100%;
@@ -62,22 +59,6 @@
             justify-content: space-between;
             align-items: center;
             box-sizing: border-box;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-decoration: none;
-            color: var(--text);
-        }
-
-        .site-logo {
-            height: 40px;
-            width: auto;
         }
 
         .hero { 
@@ -102,7 +83,7 @@
         
         .dev-credit { 
             font-size: 0.7rem; 
-            color: var(--subtext); 
+            color: #444; 
             margin-top: 10px; 
             letter-spacing: 1px; 
             text-transform: uppercase; 
@@ -136,7 +117,7 @@
         .progress-bar {
             width: 100%;
             height: 10px;
-            background: var(--border);
+            background: #222;
             border-radius: 5px;
             margin-top: 15px;
             overflow: hidden;
@@ -176,7 +157,6 @@
             border-color: var(--accent);
             transform: translateY(-5px);
             background: var(--card);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .game-card img {
@@ -187,7 +167,7 @@
         #shop-overlay {
             position: fixed;
             inset: 0;
-            background: var(--overlay);
+            background: rgba(0,0,0,0.95);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -197,14 +177,14 @@
 
         .shop-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
 
         .shop-item {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             cursor: pointer;
             border: 3px solid transparent;
@@ -215,13 +195,13 @@
         }
 
         .shop-item:hover { transform: scale(1.1); }
-        .shop-item.selected { border-color: var(--text); box-shadow: 0 0 15px var(--accent); }
+        .shop-item.selected { border-color: white; box-shadow: 0 0 15px white; }
 
         #dev-console {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background: var(--card);
+            background: #111;
             padding: 20px;
             display: none;
             justify-content: center;
@@ -229,38 +209,27 @@
             z-index: 2000;
         }
 
-        .action-btn {
-            margin-top: 40px; 
-            padding: 12px 30px; 
-            font-weight: bold; 
-            background: var(--card); 
-            color: var(--text); 
-            border: 2px solid var(--accent); 
-            border-radius: 25px; 
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        
-        .action-btn:hover {
-            background: var(--accent);
-            color: #fff;
+        .site-logo {
+            height: 40px;
+            width: auto;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="logo-container">
-            <img src="logo.png" alt="Brain" class="site-logo">
-            Brain<span style="color:var(--accent)">Train</span>
-        </a>
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <button onclick="toggleLightDark()" id="td-toggle" style="background:none; border:1px solid var(--border); color:var(--text); cursor:pointer; padding:5px 10px; border-radius:15px; font-size: 1.2rem;">🌓</button>
-            <div class="brain-display" id="brain-clicker">
-                <span>🧠</span>
-                <span id="brains">0</span>
-            </div>
+        <div style="display: flex; align-items: center; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px;">
+            <img src="logo.png" alt="" class="site-logo">
+            Brain<span style="color:var(--accent)">Train</span> Game
         </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+        <button onclick="toggleLightDark()" id="td-toggle" style="background:none; border:1px solid var(--border); color:var(--text); cursor:pointer; padding:5px 10px; border-radius:15px;">🌓</button>
+        <div class="brain-display" id="brain-clicker">
+            <span>🧠</span>
+            <span id="brains">0</span>
+        </div>
+             </div>
     </header>
 
     <div class="hero">
@@ -275,7 +244,7 @@
             <span id="rank-name" style="font-weight:bold; font-size:1.2rem; color:var(--accent)">STUDENT</span>
         </div>
         <div class="progress-bar"><div id="rank-progress"></div></div>
-        <div id="next-rank-info" style="color:var(--subtext); font-size:0.8rem; margin-top:10px;"></div>
+        <div id="next-rank-info" style="color:#666; font-size:0.8rem; margin-top:10px;"></div>
     </div>
 
     <div class="game-grid">
@@ -293,20 +262,20 @@
         </a>
     </div>
 
-    <button onclick="toggleShop()" class="action-btn">
+    <button onclick="toggleShop()" style="margin-top:40px; padding:12px 30px; font-weight:bold; background:#111; color:white; border:2px solid var(--accent); border-radius:25px; cursor:pointer;">
         🎨 OPEN SKIN SHOP
     </button>
     
-    <a href="about.html" style="color:var(--subtext); text-decoration:none; font-size:0.8rem; margin:20px 0 40px 0;">ABOUT BRAIN TRAIN</a>
+    <a href="about.html" style="color:#444; text-decoration:none; font-size:0.8rem; margin:20px 0 40px 0;">ABOUT BRAIN TRAIN</a>
 
     <div id="shop-overlay">
-        <h2 style="color:var(--text); margin-bottom:30px;">CHOOSE SKIN</h2>
+        <h2 style="color:white; margin-bottom:30px;">CHOOSE SKIN</h2>
         <div class="shop-grid" id="shop-grid"></div>
-        <button onclick="toggleShop()" style="padding:10px 20px; cursor:pointer; background:var(--text); color:var(--bg); border:none; border-radius:5px;">CLOSE</button>
+        <button onclick="toggleShop()" style="padding:10px 20px; cursor:pointer; background:white; border:none; border-radius:5px;">CLOSE</button>
     </div>
 
     <div id="dev-console">
-        <input type="text" id="dev-code" placeholder="ENTER CODE" style="padding:10px; width:200px; text-align:center; background:var(--bg); color:var(--text); border:1px solid var(--border);">
+        <input type="text" id="dev-code" placeholder="ENTER CODE" style="padding:10px; width:200px; text-align:center;">
     </div>
 
     <script>
@@ -379,13 +348,12 @@
                 overlay.style.display = 'flex';
             }
         }
-
         function toggleLightDark() {
-            const currentMode = localStorage.getItem('bt_mode') || 'dark';
-            const newMode = currentMode === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('bt_mode', newMode);
-            updateUI();
-        }
+    const currentMode = localStorage.getItem('bt_mode') || 'dark';
+    const newMode = currentMode === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('bt_mode', newMode);
+    updateUI();
+}
 
         function renderShop() {
             const grid = document.getElementById('shop-grid');
