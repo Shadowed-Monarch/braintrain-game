@@ -1,4 +1,9 @@
 function applyGlobalTheme() {
+
+    const savedMode = localStorage.getItem('bt_mode') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedMode);
+
+
     const savedSkin = localStorage.getItem('bt_current_skin') || 'red';
     const skinColors = {
         'red': '#ff0000', 'blue': '#0088ff', 'yellow': '#ffcc00', 
@@ -13,5 +18,14 @@ function applyGlobalTheme() {
         document.documentElement.style.setProperty('--accent', skinColors[savedSkin] || '#ff0000');
     }
 }
+
+
+function toggleLightDark() {
+    const currentMode = localStorage.getItem('bt_mode') || 'dark';
+    const newMode = currentMode === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('bt_mode', newMode);
+    applyGlobalTheme();
+}
+
 
 applyGlobalTheme();
