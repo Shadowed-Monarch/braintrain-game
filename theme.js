@@ -12,19 +12,12 @@ function applyGlobalTheme() {
     };
 
     if(savedSkin === 'rainbow') {
+
         document.documentElement.style.animation = "rainbow-glow 5s infinite linear";
     } else {
         document.documentElement.style.animation = "none";
         document.documentElement.style.setProperty('--accent', skinColors[savedSkin] || '#ff0000');
     }
-}
-
-
-function toggleLightDark() {
-    const currentMode = localStorage.getItem('bt_mode') || 'dark';
-    const newMode = currentMode === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('bt_mode', newMode);
-    applyGlobalTheme();
 }
 
 
