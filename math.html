@@ -58,7 +58,7 @@
 
     <div id="game-container">
         <div id="menu-overlay">
-            <h1 id="m-title" style="font-size:3rem; margin:0;">GAME OVER</h1>
+            <h1 id="m-title" style="font-size:3rem; margin:0;">TIME OVER ! TOO LATE, U CAN'T DO THIS LEVEL 💀</h1>
         </div>
     </div>
 
@@ -174,7 +174,7 @@
                     nextBtn.onclick = () => { selectedLvl++; this.initMenu(); this.updateUI(); this.start(); };
                     overlay.appendChild(nextBtn);
                 } else { 
-                    document.getElementById('m-title').innerText = "GAME OVER"; 
+                    document.getElementById('m-title').innerText = "TIME OVER ! TOO LATE, U CAN'T DO THIS LEVEL 💀"; 
                     const retryBtn = document.createElement('button');
                     retryBtn.className = 'start-btn temp-btn';
                     retryBtn.innerText = "PLAY AGAIN";
