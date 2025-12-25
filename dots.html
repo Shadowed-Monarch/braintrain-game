@@ -16,7 +16,7 @@
         }
         .rainbow-active { animation: rainbow-loop 5s infinite linear !important; }
 
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: manipulation; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
         header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); align-items: center; background: var(--bg); box-sizing: border-box; }
         .brain-wrap { display: flex; align-items: center; gap: 8px; color: #ff77ff; font-weight: bold; }
         
@@ -27,7 +27,7 @@
             background: var(--bg); border: 2px solid var(--accent); color: var(--text);
             display: flex; align-items: center; justify-content: center; font-weight: bold;
             cursor: pointer; box-shadow: 0 0 10px var(--shadow-color);
-            user-select: none; touch-action: none; 
+            user-select: none; touch-action: none;
         }
 
         #stats-bar { display: flex; justify-content: space-around; width: 100%; max-width: 800px; font-size: 1.2rem; margin-top: 10px; }
@@ -62,6 +62,7 @@
         class DotGame {
             constructor() {
                 this.brains = parseInt(localStorage.getItem('bt_coins')) || 0;
+                this.unlockedLvl = parseInt(localStorage.getItem('bt_unlocked_dots')) || 1;
                 this.isPlaying = false;
                 this.nextNum = 1;
                 this.maxTime = 5000;
@@ -76,8 +77,9 @@
             }
 
             initMenu() {
-                document.getElementById('btn-container').style.display = 'none';
-                document.getElementById('btn-container').innerHTML = `<h1 id="m-title" style="font-size:2.5rem;">TIME OVER ! TOO LATE, U CAN'T DO THIS LEVEL 💀</h1>`;
+                const btnContainer = document.getElementById('btn-container');
+                btnContainer.style.display = 'none';
+                btnContainer.innerHTML = `<h1 id="m-title" style="font-size:2.5rem;">TIME OVER ! TOO LATE, U CAN'T DO THIS LEVEL 💀</h1>`;
                 this.nextNum = 1;
                 this.timeLeft = 5000;
                 document.getElementById('next-num').innerText = "1";
@@ -97,11 +99,10 @@
                 }, 100);
             }
 
-            // !! REPLACED WITH OPTIMIZED TOUCH AND COLLISION CHECK !!
             spawnDots(count) {
                 const container = document.getElementById('game-container');
                 const dotsList = []; 
-                const minDistance = 70; // Ensures numbers don't overlap
+                const minDistance = 75; 
 
                 for(let i=1; i<=count; i++) {
                     const dot = document.createElement('div');
@@ -123,7 +124,7 @@
                             const distance = Math.sqrt(dx * dx + dy * dy);
                             if (distance < minDistance) { tooClose = true; break; }
                         }
-                        if (attempts > 50) break; 
+                        if (attempts > 100) break; 
                     } while (tooClose);
 
                     dotsList.push({ x, y });
@@ -133,22 +134,25 @@
                     let fadeSpeed = Math.max(0.5, 3 - (selectedLvl * 0.1));
                     dot.style.transition = `opacity ${fadeSpeed}s`;
 
-                    // !! OPTIMIZED TOUCH: Changed from onclick to onpointerdown !!
-                    dot.onpointerdown = (e) => {
-                        e.preventDefault(); // Prevents ghost clicks and zoom
+                    const handleTouch = (e) => {
+                        if(e) e.preventDefault();
                         if(!this.isPlaying) return;
 
                         if(parseInt(dot.innerText) === this.nextNum) {
                             dot.remove();
                             this.nextNum++;
                             document.getElementById('next-num').innerText = this.nextNum;
-                            this.timeLeft = Math.min(this.timeLeft + 600, this.maxTime); 
+                            this.timeLeft = Math.min(this.timeLeft + 500, this.maxTime); 
 
                             if(this.nextNum > count) this.end(true);
                         } else {
                             this.end(false);
                         }
                     };
+
+                    dot.ontouchstart = handleTouch;
+                    dot.onmousedown = handleTouch;
+
                     container.appendChild(dot);
                 }
             }
@@ -164,8 +168,9 @@
 
                 if(win) {
                     this.brains += (selectedLvl * 5);
-                    if(selectedLvl === (parseInt(localStorage.getItem('bt_unlocked_dots'))||1)) {
-                         localStorage.setItem('bt_unlocked_dots', selectedLvl + 1);
+                    if (selectedLvl === this.unlockedLvl) {
+                        this.unlockedLvl++;
+                        localStorage.setItem('bt_unlocked_dots', this.unlockedLvl);
                     }
                     localStorage.setItem('bt_coins', this.brains);
                     document.getElementById('m-title').innerText = "LEVEL CLEAR!";
