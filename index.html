@@ -11,75 +11,77 @@
         @keyframes rainbow-loop { 0% { --accent: #ff0000; } 20% { --accent: #ffcc00; } 40% { --accent: #00ff00; } 60% { --accent: #00ffff; } 80% { --accent: #9900ff; } 100% { --accent: #ff0000; } }
         .rainbow-active { animation: rainbow-loop 5s infinite linear !important; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background 0.3s; }
-        header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .logo { font-size: 1.8rem; font-weight: 800; letter-spacing: 2px; }
         .logo span { color: var(--accent); }
-        .stats-top { display: flex; gap: 20px; align-items: center; }
-        .brain-count { color: #ff77ff; font-weight: bold; font-size: 1.2rem; }
+        
+        .progress-container { width: 100%; max-width: 400px; margin-bottom: 30px; text-align: center; }
+        .progress-bar { width: 100%; height: 10px; background: var(--border); border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        #rank-progress { height: 100%; background: var(--accent); width: 0%; transition: 0.5s; }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
-        .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 30px; text-align: center; transition: 0.3s; text-decoration: none; color: inherit; position: relative; overflow: hidden; }
-        .game-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px -10px var(--accent); }
-        .game-card h3 { margin: 10px 0; font-size: 1.5rem; }
-        .game-card p { color: var(--subtext); font-size: 0.9rem; margin-bottom: 20px; }
+        .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 30px; text-align: center; transition: 0.3s; text-decoration: none; color: inherit; position: relative; }
+        .game-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .game-card img { width: 80px; height: 80px; margin-bottom: 15px; }
         .lvl-tag { position: absolute; top: 15px; right: 15px; font-size: 0.8rem; font-weight: bold; color: var(--accent); }
-        .shop-section { margin-top: 60px; width: 100%; max-width: 1000px; }
-        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 20px; }
-        .skin-item { aspect-ratio: 1; border-radius: 15px; border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.7rem; gap: 5px; transition: 0.2s; background: var(--card); }
-        .skin-item.locked { opacity: 0.6; }
-        .skin-item.active { border-color: var(--accent); transform: scale(1.05); }
-        .swatch { width: 30px; height: 30px; border-radius: 50%; }
-        #dev-console { display: none; position: fixed; bottom: 20px; background: #000; border: 1px solid #333; padding: 10px; border-radius: 10px; z-index: 100; }
-        #dev-code { background: #000; color: #0f0; border: none; outline: none; font-family: monospace; }
-        .mode-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+
+        .shop-btn { margin-top: 40px; padding: 12px 30px; font-weight: bold; background: var(--card); color: var(--text); border: 2px solid var(--accent); cursor: pointer; border-radius: 10px; }
+        .shop-section { display: none; margin-top: 20px; width: 100%; max-width: 1000px; }
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
+        .skin-item { aspect-ratio: 1; border-radius: 15px; border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.7rem; background: var(--card); }
+        .skin-item.active { border-color: var(--accent); }
+        .swatch { width: 30px; height: 30px; border-radius: 50%; margin-bottom: 5px; }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">BRAIN<span>TRAIN</span></div>
-        <div class="stats-top">
-            <button class="mode-btn" onclick="toggleMode()">THEME</button>
-            <a href="about.html" class="mode-btn" style="text-decoration: none;">ABOUT</a>
-            <div class="brain-count" id="brain-clicker">🧠 <span id="user-brains">0</span></div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button onclick="toggleMode()" style="background:none; border:1px solid var(--border); color:var(--text); padding:5px 10px; border-radius:5px; cursor:pointer;">THEME</button>
+            <div style="color: #ff77ff; font-weight: bold;">🧠 <span id="user-brains">0</span></div>
         </div>
     </header>
+
+    <div class="progress-container">
+        <div>RANK: <span id="rank-name" style="font-weight:bold; color:var(--accent)">STUDENT</span></div>
+        <div class="progress-bar"><div id="rank-progress"></div></div>
+        <div id="next-rank-info" style="color:var(--subtext); font-size:0.8rem;"></div>
+    </div>
 
     <div class="grid">
         <a href="math.html" class="game-card">
             <div class="lvl-tag">LVL <span id="math-lvl">1</span></div>
-            <div style="font-size: 3rem;">🔢</div>
+            <img src="https://cdn-icons-png.flaticon.com/512/3771/3771278.png" alt="Math">
             <h3>Maths Train</h3>
             <p>Solve equations before the bubbles hit the floor.</p>
         </a>
 
         <a href="grammar.html" class="game-card">
             <div class="lvl-tag">LVL <span id="grammar-lvl">1</span></div>
-            <div style="font-size: 3rem;">✍️</div>
-            <h3>Opposite Train</h3>
+            <img src="https://cdn-icons-png.flaticon.com/512/3850/3850285.png" alt="Grammar">
+            <h3>Grammar Train</h3>
             <p>Type the opposite of words as they fall.</p>
         </a>
 
         <a href="dots.html" class="game-card">
             <div class="lvl-tag">LVL <span id="dots-lvl">1</span></div>
-            <div style="font-size: 3rem;">🎯</div>
+            <img src="https://cdn-icons-png.flaticon.com/512/3306/3306631.png" alt="Dots">
             <h3>Dots Reflex</h3>
             <p>Tap the numbers in order as fast as you can.</p>
         </a>
 
         <a href="memory.html" class="game-card">
             <div class="lvl-tag">LVL <span id="memory-lvl">1</span></div>
-            <div style="font-size: 3rem;">🧠</div>
+            <img src="https://cdn-icons-png.flaticon.com/512/2491/2491211.png" alt="Memory">
             <h3>Memory Matrix</h3>
             <p>Remember the glowing blocks and tap them.</p>
         </a>
     </div>
 
-    <div class="shop-section">
-        <h2>SKIN SHOP</h2>
-        <div class="shop-grid" id="skin-grid"></div>
-    </div>
+    <button class="shop-btn" onclick="toggleShop()">OPEN SKIN SHOP</button>
 
-    <div id="dev-console">
-        <input type="text" id="dev-code" placeholder="ENTER CODE...">
+    <div class="shop-section" id="shop-area">
+        <div class="shop-grid" id="skin-grid"></div>
     </div>
 
     <script>
@@ -96,14 +98,28 @@
             { id: 'rainbow', color: 'linear-gradient(45deg, red, orange, yellow, green, blue, purple)', cost: 10000 }
         ];
 
+        function toggleShop() {
+            const shop = document.getElementById('shop-area');
+            shop.style.display = shop.style.display === 'block' ? 'none' : 'block';
+        }
+
         function updateUI() {
-            const brains = localStorage.getItem('bt_coins') || 0;
+            const brains = parseInt(localStorage.getItem('bt_coins')) || 0;
             document.getElementById('user-brains').innerText = brains;
-            document.getElementById('math-lvl').innerText = localStorage.getItem('bt_unlocked_math') || 1;
-            document.getElementById('grammar-lvl').innerText = localStorage.getItem('bt_unlocked_grammar') || 1;
-            document.getElementById('dots-lvl').innerText = localStorage.getItem('bt_unlocked_dots') || 1;
-            document.getElementById('memory-lvl').innerText = localStorage.getItem('bt_unlocked_memory') || 1;
             
+            const mLvl = parseInt(localStorage.getItem('bt_unlocked_math')) || 1;
+            const gLvl = parseInt(localStorage.getItem('bt_unlocked_grammar')) || 1;
+            const dLvl = parseInt(localStorage.getItem('bt_unlocked_dots')) || 1;
+            const memLvl = parseInt(localStorage.getItem('bt_unlocked_memory')) || 1;
+
+            document.getElementById('math-lvl').innerText = mLvl;
+            document.getElementById('grammar-lvl').innerText = gLvl;
+            document.getElementById('dots-lvl').innerText = dLvl;
+            document.getElementById('memory-lvl').innerText = memLvl;
+
+            const totalLvl = mLvl + gLvl + dLvl + memLvl - 4;
+            updateRank(totalLvl);
+
             const currentSkin = localStorage.getItem('bt_current_skin') || 'red';
             if(currentSkin === 'rainbow') {
                 document.body.classList.add('rainbow-active');
@@ -115,34 +131,46 @@
             renderShop();
         }
 
-        function toggleMode() {
-            const current = localStorage.getItem('bt_mode') || 'dark';
-            const next = current === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('bt_mode', next);
-            document.documentElement.setAttribute('data-theme', next);
+        function updateRank(lvls) {
+            const ranks = [
+                { name: "STUDENT", min: 0, max: 10 },
+                { name: "SCHOLAR", min: 10, max: 30 },
+                { name: "GENIUS", min: 30, max: 60 },
+                { name: "MASTER", min: 60, max: 100 },
+                { name: "OVERLORD", min: 100, max: 999 }
+            ];
+            let currentRank = ranks[0];
+            for (let r of ranks) { if (lvls >= r.min) currentRank = r; }
+            
+            document.getElementById('rank-name').innerText = currentRank.name;
+            let progress = ((lvls - currentRank.min) / (currentRank.max - currentRank.min)) * 100;
+            document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
+            document.getElementById('next-rank-info').innerText = lvls < 100 ? `${currentRank.max - lvls} levels to next rank` : "MAX RANK ACHIEVED";
         }
 
         function renderShop() {
             const grid = document.getElementById('skin-grid');
             grid.innerHTML = '';
-            const userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
+            const brains = parseInt(localStorage.getItem('bt_coins')) || 0;
             const currentSkin = localStorage.getItem('bt_current_skin') || 'red';
             const purchased = JSON.parse(localStorage.getItem('bt_skins_owned')) || ['red'];
 
             skins.forEach(s => {
+                const isOwned = purchased.includes(s.id);
                 const el = document.createElement('div');
-                el.className = `skin-item ${!purchased.includes(s.id) ? 'locked' : ''} ${currentSkin === s.id ? 'active' : ''}`;
+                el.className = `skin-item ${currentSkin === s.id ? 'active' : ''}`;
+                el.style.opacity = isOwned ? "1" : "0.6";
                 el.innerHTML = `
                     <div class="swatch" style="background: ${s.color}"></div>
-                    <div>${s.id.toUpperCase()}</div>
-                    <div>${purchased.includes(s.id) ? 'OWNED' : s.cost + ' 🧠'}</div>
+                    <div style="font-weight:bold">${s.id.toUpperCase()}</div>
+                    <div>${isOwned ? 'OWNED' : s.cost + ' 🧠'}</div>
                 `;
                 el.onclick = () => {
-                    if(purchased.includes(s.id)) {
+                    if(isOwned) {
                         localStorage.setItem('bt_current_skin', s.id);
                         updateUI();
-                    } else if(userBrains >= s.cost) {
-                        localStorage.setItem('bt_coins', userBrains - s.cost);
+                    } else if(brains >= s.cost) {
+                        localStorage.setItem('bt_coins', brains - s.cost);
                         purchased.push(s.id);
                         localStorage.setItem('bt_skins_owned', JSON.stringify(purchased));
                         localStorage.setItem('bt_current_skin', s.id);
@@ -153,30 +181,13 @@
             });
         }
 
-        let clicks = 0;
-        let timer;
-        document.getElementById('brain-clicker').onclick = () => {
-            clicks++;
-            clearTimeout(timer);
-            timer = setTimeout(() => clicks = 0, 1000);
-            if(clicks === 5) {
-                const dev = document.getElementById('dev-console');
-                dev.style.display = dev.style.display === 'flex' ? 'none' : 'flex';
-                clicks = 0;
-            }
-        };
+        function toggleMode() {
+            const next = (localStorage.getItem('bt_mode') || 'dark') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('bt_mode', next);
+            document.documentElement.setAttribute('data-theme', next);
+        }
 
-        document.getElementById('dev-code').onkeypress = (e) => {
-            if(e.key === 'Enter') {
-                const val = e.target.value.toUpperCase();
-                if(val === 'GODMODE') { localStorage.setItem('bt_coins', 99999); updateUI(); }
-                if(val === 'RESET') { localStorage.clear(); location.reload(); }
-                document.getElementById('dev-console').style.display = 'none';
-            }
-        };
-
-        const initialMode = localStorage.getItem('bt_mode') || 'dark';
-        document.documentElement.setAttribute('data-theme', initialMode);
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('bt_mode') || 'dark');
         window.onload = updateUI;
     </script>
 </body>
