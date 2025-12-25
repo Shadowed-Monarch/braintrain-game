@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div class="icon-container">
     <link rel="icon" href="icon.ico">
+        </div>
     <title>BrainTrain Game</title>
     <style>
         @property --accent {
@@ -31,6 +33,14 @@
             --overlay: rgba(255,255,255,0.95);
             --shadow-color: transparent;
         }
+        .icon-container {
+    border: 3px solid #000; 
+    border-radius: 50%; 
+    padding: 10px; 
+    display: inline-block; 
+    text-align: center;
+}
+
 
         @keyframes rainbow-loop {
             0% { --accent: #ff0000; }
