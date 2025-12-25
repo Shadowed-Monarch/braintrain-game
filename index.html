@@ -5,190 +5,452 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrainTrain Game</title>
     <style>
-        @property --accent { syntax: '<color>'; initial-value: #ff0000; inherits: true; }
-        :root[data-theme="dark"] { --bg: #050505; --card: #111; --text: #ffffff; --subtext: #666; --border: #333; }
-        :root[data-theme="light"] { --bg: #f5f5f5; --card: #ffffff; --text: #000000; --subtext: #555; --border: #ddd; }
-        @keyframes rainbow-loop { 0% { --accent: #ff0000; } 20% { --accent: #ffcc00; } 40% { --accent: #00ff00; } 60% { --accent: #00ffff; } 80% { --accent: #9900ff; } 100% { --accent: #ff0000; } }
-        .rainbow-active { animation: rainbow-loop 5s infinite linear !important; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background 0.3s; }
-        header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .logo { font-size: 1.8rem; font-weight: 800; letter-spacing: 2px; }
-        .logo span { color: var(--accent); }
+        @property --accent {
+            syntax: '<color>';
+            initial-value: #ff0000;
+            inherits: true;
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #050505;
+            --card: #111;
+            --text: #ffffff;
+            --subtext: #666;
+            --border: #333;
+            --overlay: rgba(0,0,0,0.95);
+            --shadow-color: var(--accent);
+        }
+
+        :root[data-theme="light"] {
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #000000;
+            --subtext: #555;
+            --border: #ddd;
+            --overlay: rgba(255,255,255,0.95);
+            --shadow-color: transparent;
+        }
+
+        @keyframes rainbow-loop {
+            0% { --accent: #ff0000; }
+            20% { --accent: #ffcc00; }
+            40% { --accent: #00ff00; }
+            60% { --accent: #00ffff; }
+            80% { --accent: #9900ff; }
+            100% { --accent: #ff0000; }
+        }
+
+        .rainbow-active {
+            animation: rainbow-loop 5s infinite linear !important;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            gap: 10px;
+        }
+
+        .site-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .hero { 
+            text-align: center; 
+            margin: 20px 0 40px 0; 
+        }
         
-        .progress-container { width: 100%; max-width: 400px; margin-bottom: 30px; text-align: center; }
-        .progress-bar { width: 100%; height: 10px; background: var(--border); border-radius: 5px; margin: 10px 0; overflow: hidden; }
-        #rank-progress { height: 100%; background: var(--accent); width: 0%; transition: 0.5s; }
+        .hero h1 { 
+            font-size: 3rem; 
+            margin: 0; 
+            letter-spacing: 4px; 
+            font-weight: 900; 
+            text-shadow: 0 0 15px var(--shadow-color);
+        }
+        
+        .hero p { 
+            color: var(--subtext);
+            letter-spacing: 2px; 
+            margin-top: 5px; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+        }
+        
+        .dev-credit { 
+            font-size: 0.7rem; 
+            color: var(--subtext); 
+            margin-top: 10px; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
+        }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
-        .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 30px; text-align: center; transition: 0.3s; text-decoration: none; color: inherit; position: relative; }
-        .game-card:hover { border-color: var(--accent); transform: translateY(-5px); }
-        .game-card img { width: 80px; height: 80px; margin-bottom: 15px; }
-        .lvl-tag { position: absolute; top: 15px; right: 15px; font-size: 0.8rem; font-weight: bold; color: var(--accent); }
+        .brain-display {
+            background: rgba(255, 119, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 12px;
+            color: #ff77ff;
+            font-weight: bold;
+            border: 2px solid #ff77ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
 
-        .shop-btn { margin-top: 40px; padding: 12px 30px; font-weight: bold; background: var(--card); color: var(--text); border: 2px solid var(--accent); cursor: pointer; border-radius: 10px; }
-        .shop-section { display: none; margin-top: 20px; width: 100%; max-width: 1000px; }
-        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
-        .skin-item { aspect-ratio: 1; border-radius: 15px; border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.7rem; background: var(--card); }
-        .skin-item.active { border-color: var(--accent); }
-        .swatch { width: 30px; height: 30px; border-radius: 50%; margin-bottom: 5px; }
+        .rank-container {
+            width: 90%;
+            max-width: 500px;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            color: var(--text);
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        #rank-progress {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--shadow-color);
+        }
+
+        .game-grid {
+            display: grid;
+            /* Changed grid columns to accommodate 4 games nicely */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .game-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--border);
+            text-decoration: none;
+            color: var(--text);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .game-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            background: var(--card);
+            box-shadow: 0 0 15px var(--shadow-color);
+        }
+
+        .game-card img {
+            width: 50px;
+            margin-bottom: 10px;
+        }
+
+        #shop-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .shop-item {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .shop-item:hover { transform: scale(1.1); }
+        .shop-item.selected { border-color: var(--text); box-shadow: 0 0 15px var(--text); }
+
+        #dev-console {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--card);
+            padding: 20px;
+            display: none;
+            justify-content: center;
+            border-top: 2px solid var(--accent);
+            z-index: 2000;
+        }
     </style>
 </head>
 <body>
+
     <header>
-        <div class="logo">BRAIN<span>TRAIN</span></div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <button onclick="toggleMode()" style="background:none; border:1px solid var(--border); color:var(--text); padding:5px 10px; border-radius:5px; cursor:pointer;">THEME</button>
-            <div style="color: #ff77ff; font-weight: bold;">🧠 <span id="user-brains">0</span></div>
+        <div class="logo-area">
+            <img src="logo.png" alt="" class="site-logo">
+            Brain<span style="color:var(--accent)">Train</span> Game
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <button onclick="toggleLightDark()" style="background:none; border:1px solid var(--border); color:var(--text); cursor:pointer; padding:5px 10px; border-radius:15px; font-size: 1.2rem;">🌓</button>
+            <div class="brain-display" id="brain-clicker">
+                <span>🧠</span>
+                <span id="brains">0</span>
+            </div>
         </div>
     </header>
 
-    <div class="progress-container">
-        <div>RANK: <span id="rank-name" style="font-weight:bold; color:var(--accent)">STUDENT</span></div>
+    <div class="hero">
+        <h1>BRAIN TRAIN</h1>
+        <p>Master your mind speed.</p>
+        <div class="dev-credit">DEVELOPED BY SHADOWED</div>
+    </div>
+
+    <div class="rank-container">
+        <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px;">
+            <span id="rank-icon" style="font-size:1.5rem;">🎓</span>
+            <span id="rank-name" style="font-weight:bold; font-size:1.2rem; color:var(--accent)">STUDENT</span>
+        </div>
         <div class="progress-bar"><div id="rank-progress"></div></div>
-        <div id="next-rank-info" style="color:var(--subtext); font-size:0.8rem;"></div>
+        <div id="next-rank-info" style="color:var(--subtext); font-size:0.8rem; margin-top:10px;"></div>
     </div>
 
-    <div class="grid">
+    <div class="game-grid">
         <a href="math.html" class="game-card">
-            <div class="lvl-tag">LVL <span id="math-lvl">1</span></div>
             <img src="https://cdn-icons-png.flaticon.com/512/3771/3771278.png" alt="Math">
-            <h3>Maths Train</h3>
-            <p>Solve equations before the bubbles hit the floor.</p>
+            <h3>MATH</h3>
         </a>
-
         <a href="grammar.html" class="game-card">
-            <div class="lvl-tag">LVL <span id="grammar-lvl">1</span></div>
             <img src="https://cdn-icons-png.flaticon.com/512/3850/3850285.png" alt="Grammar">
-            <h3>Grammar Train</h3>
-            <p>Type the opposite of words as they fall.</p>
+            <h3>GRAMMAR</h3>
         </a>
-
         <a href="dots.html" class="game-card">
-            <div class="lvl-tag">LVL <span id="dots-lvl">1</span></div>
             <img src="https://cdn-icons-png.flaticon.com/512/3306/3306631.png" alt="Dots">
-            <h3>Dots Reflex</h3>
-            <p>Tap the numbers in order as fast as you can.</p>
+            <h3>DOTS</h3>
         </a>
-
         <a href="memory.html" class="game-card">
-            <div class="lvl-tag">LVL <span id="memory-lvl">1</span></div>
             <img src="https://cdn-icons-png.flaticon.com/512/2491/2491211.png" alt="Memory">
-            <h3>Memory Matrix</h3>
-            <p>Remember the glowing blocks and tap them.</p>
+            <h3>MEMORY</h3>
         </a>
     </div>
 
-    <button class="shop-btn" onclick="toggleShop()">OPEN SKIN SHOP</button>
+    <button onclick="toggleShop()" style="margin-top:40px; padding:12px 30px; font-weight:bold; background:var(--card); color:var(--text); border:2px solid var(--accent); border-radius:25px; cursor:pointer;">
+        🎨 OPEN SKIN SHOP
+    </button>
+    
+    <a href="about.html" style="color:var(--subtext); text-decoration:none; font-size:0.8rem; margin:20px 0 40px 0;">ABOUT BRAIN TRAIN</a>
 
-    <div class="shop-section" id="shop-area">
-        <div class="shop-grid" id="skin-grid"></div>
+    <div id="shop-overlay">
+        <h2 style="color:var(--text); margin-bottom:30px;">CHOOSE SKIN</h2>
+        <div class="shop-grid" id="shop-grid"></div>
+        <button onclick="toggleShop()" style="padding:10px 20px; cursor:pointer; background:var(--text); color:var(--bg); border:none; border-radius:5px;">CLOSE</button>
+    </div>
+
+    <div id="dev-console">
+        <input type="text" id="dev-code" placeholder="ENTER CODE" style="padding:10px; width:200px; text-align:center; background:var(--bg); color:var(--text); border:1px solid var(--border);">
     </div>
 
     <script>
-        const skins = [
-            { id: 'red', color: '#ff0000', cost: 0 },
-            { id: 'blue', color: '#0088ff', cost: 500 },
-            { id: 'green', color: '#00ff00', cost: 1000 },
-            { id: 'yellow', color: '#ffcc00', cost: 1500 },
-            { id: 'cyan', color: '#00ffff', cost: 2000 },
-            { id: 'pink', color: '#ff00ff', cost: 2500 },
-            { id: 'purple', color: '#9900ff', cost: 3000 },
-            { id: 'orange', color: '#ff6600', cost: 3500 },
-            { id: 'gold', color: '#ffd700', cost: 5000 },
-            { id: 'rainbow', color: 'linear-gradient(45deg, red, orange, yellow, green, blue, purple)', cost: 10000 }
+        const colors = [
+            {id:'red', hex:'#ff0000', cost:0},
+            {id:'blue', hex:'#0088ff', cost:500},
+            {id:'yellow', hex:'#ffcc00', cost:1000},
+            {id:'green', hex:'#00ff00', cost:2000},
+            {id:'cyan', hex:'#00ffff', cost:3500},       
+            {id:'pink', hex:'#ff00ff', cost:5000},       
+            {id:'purple', hex:'#9900ff', cost:7500},
+            {id:'orange', hex:'#ff6600', cost:10000},  
+            {id:'gold', hex:'#ffd700', cost:25000},
+            {id:'rainbow', hex:'linear-gradient(45deg, #ff0000, #ffcc00, #00ff00, #0088ff, #9900ff)', cost:50000}
         ];
 
-        function toggleShop() {
-            const shop = document.getElementById('shop-area');
-            shop.style.display = shop.style.display === 'block' ? 'none' : 'block';
-        }
+        const ranks = [
+            { name: "Student", min: 0, icon: "🎓" },
+            { name: "Scholar", min: 500, icon: "📜" },
+            { name: "Genius", min: 2000, icon: "💡" },
+            { name: "Mastermind", min: 5000, icon: "👑" },
+            { name: "Overlord", min: 10000, icon: "🌌" }
+        ];
+
+        let userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
+        let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red'];
+        let currentSkin = localStorage.getItem('bt_current_skin') || 'red';
 
         function updateUI() {
-            const brains = parseInt(localStorage.getItem('bt_coins')) || 0;
-            document.getElementById('user-brains').innerText = brains;
+            const savedMode = localStorage.getItem('bt_mode') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedMode);
+            userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
+            currentSkin = localStorage.getItem('bt_current_skin') || 'red';
+
+            document.getElementById('brains').innerText = userBrains;
+
+            let currentRank = ranks[0];
+            let nextRank = ranks[1] || ranks[0];
+            for (let i = 0; i < ranks.length; i++) {
+                if (userBrains >= ranks[i].min) {
+                    currentRank = ranks[i];
+                    nextRank = ranks[i + 1] || { name: "MAX", min: userBrains, icon: "🌌" };
+                }
+            }
+
+            document.getElementById('rank-name').innerText = currentRank.name;
+            document.getElementById('rank-icon').innerText = currentRank.icon;
+            document.getElementById('next-rank-info').innerText = nextRank.name === "MAX" ? "MAX LEVEL" : `Next: ${nextRank.name} at ${nextRank.min}`;
+
+            let progress = ((userBrains - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
+            if(nextRank.name === "MAX") progress = 100;
+            document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
+
+            const skinObj = colors.find(c => c.id === currentSkin) || colors[0];
             
-            const mLvl = parseInt(localStorage.getItem('bt_unlocked_math')) || 1;
-            const gLvl = parseInt(localStorage.getItem('bt_unlocked_grammar')) || 1;
-            const dLvl = parseInt(localStorage.getItem('bt_unlocked_dots')) || 1;
-            const memLvl = parseInt(localStorage.getItem('bt_unlocked_memory')) || 1;
-
-            document.getElementById('math-lvl').innerText = mLvl;
-            document.getElementById('grammar-lvl').innerText = gLvl;
-            document.getElementById('dots-lvl').innerText = dLvl;
-            document.getElementById('memory-lvl').innerText = memLvl;
-
-            const totalLvl = mLvl + gLvl + dLvl + memLvl - 4;
-            updateRank(totalLvl);
-
-            const currentSkin = localStorage.getItem('bt_current_skin') || 'red';
             if(currentSkin === 'rainbow') {
                 document.body.classList.add('rainbow-active');
             } else {
                 document.body.classList.remove('rainbow-active');
-                const colors = { red:'#ff0000', blue:'#0088ff', green:'#00ff00', yellow:'#ffcc00', cyan:'#00ffff', pink:'#ff00ff', purple:'#9900ff', orange:'#ff6600', gold:'#ffd700' };
-                document.documentElement.style.setProperty('--accent', colors[currentSkin] || '#ff0000');
+                document.documentElement.style.setProperty('--accent', skinObj.hex);
             }
-            renderShop();
         }
 
-        function updateRank(lvls) {
-            const ranks = [
-                { name: "STUDENT", min: 0, max: 10 },
-                { name: "SCHOLAR", min: 10, max: 30 },
-                { name: "GENIUS", min: 30, max: 60 },
-                { name: "MASTER", min: 60, max: 100 },
-                { name: "OVERLORD", min: 100, max: 999 }
-            ];
-            let currentRank = ranks[0];
-            for (let r of ranks) { if (lvls >= r.min) currentRank = r; }
-            
-            document.getElementById('rank-name').innerText = currentRank.name;
-            let progress = ((lvls - currentRank.min) / (currentRank.max - currentRank.min)) * 100;
-            document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
-            document.getElementById('next-rank-info').innerText = lvls < 100 ? `${currentRank.max - lvls} levels to next rank` : "MAX RANK ACHIEVED";
+        function toggleShop() {
+            const overlay = document.getElementById('shop-overlay');
+            if(overlay.style.display === 'flex') {
+                overlay.style.display = 'none';
+            } else {
+                renderShop();
+                overlay.style.display = 'flex';
+            }
+        }
+
+        function toggleLightDark() {
+            const currentMode = localStorage.getItem('bt_mode') || 'dark';
+            const newMode = currentMode === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('bt_mode', newMode);
+            updateUI();
         }
 
         function renderShop() {
-            const grid = document.getElementById('skin-grid');
+            const grid = document.getElementById('shop-grid');
             grid.innerHTML = '';
-            const brains = parseInt(localStorage.getItem('bt_coins')) || 0;
-            const currentSkin = localStorage.getItem('bt_current_skin') || 'red';
-            const purchased = JSON.parse(localStorage.getItem('bt_skins_owned')) || ['red'];
 
-            skins.forEach(s => {
-                const isOwned = purchased.includes(s.id);
+            colors.forEach(c => {
                 const el = document.createElement('div');
-                el.className = `skin-item ${currentSkin === s.id ? 'active' : ''}`;
-                el.style.opacity = isOwned ? "1" : "0.6";
-                el.innerHTML = `
-                    <div class="swatch" style="background: ${s.color}"></div>
-                    <div style="font-weight:bold">${s.id.toUpperCase()}</div>
-                    <div>${isOwned ? 'OWNED' : s.cost + ' 🧠'}</div>
-                `;
-                el.onclick = () => {
-                    if(isOwned) {
-                        localStorage.setItem('bt_current_skin', s.id);
-                        updateUI();
-                    } else if(brains >= s.cost) {
-                        localStorage.setItem('bt_coins', brains - s.cost);
-                        purchased.push(s.id);
-                        localStorage.setItem('bt_skins_owned', JSON.stringify(purchased));
-                        localStorage.setItem('bt_current_skin', s.id);
-                        updateUI();
+                el.className = 'shop-item';
+                el.style.background = c.hex;
+
+                if(unlocked.includes(c.id)) {
+                    if(currentSkin === c.id) {
+                        el.classList.add('selected');
                     }
-                };
+                    el.onclick = () => {
+                        currentSkin = c.id;
+                        localStorage.setItem('bt_current_skin', c.id);
+                        updateUI();
+                        renderShop();
+                    };
+                } else {
+                    el.innerHTML = `<span style="font-size:10px; font-weight:bold; color:${['yellow','cyan','gold','rainbow'].includes(c.id) ? 'black' : 'white'}">${c.cost}</span>`;
+                    el.style.opacity = "0.7";
+                    
+                    el.onclick = () => {
+                        if(userBrains >= c.cost) {
+                            userBrains -= c.cost;
+                            unlocked.push(c.id);
+                            localStorage.setItem('bt_coins', userBrains);
+                            localStorage.setItem('bt_skins', JSON.stringify(unlocked));
+                            
+                            currentSkin = c.id;
+                            localStorage.setItem('bt_current_skin', c.id);
+                            
+                            updateUI();
+                            renderShop();
+                        } else {
+                            alert(`Need ${c.cost} Brains! You have ${userBrains}.`);
+                        }
+                    };
+                }
                 grid.appendChild(el);
             });
         }
 
-        function toggleMode() {
-            const next = (localStorage.getItem('bt_mode') || 'dark') === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('bt_mode', next);
-            document.documentElement.setAttribute('data-theme', next);
-        }
+        let clicks = 0;
+        let timer;
+        document.getElementById('brain-clicker').onclick = () => {
+            clicks++;
+            clearTimeout(timer);
+            timer = setTimeout(() => clicks = 0, 1000);
+            if(clicks === 5) {
+                const dev = document.getElementById('dev-console');
+                dev.style.display = dev.style.display === 'flex' ? 'none' : 'flex';
+                clicks = 0;
+            }
+        };
 
-        document.documentElement.setAttribute('data-theme', localStorage.getItem('bt_mode') || 'dark');
+        document.getElementById('dev-code').onkeypress = (e) => {
+            if(e.key === 'Enter') {
+                const val = e.target.value.toUpperCase();
+                if(val === 'GODMODE') {
+                    localStorage.setItem('bt_coins', 99999);
+                    updateUI();
+                }
+                if(val === 'RESET') {
+                    localStorage.clear();
+                    location.reload();
+                }
+                document.getElementById('dev-console').style.display = 'none';
+            }
+        };
+
         window.onload = updateUI;
+        window.onfocus = updateUI; 
+
     </script>
 </body>
 </html>
