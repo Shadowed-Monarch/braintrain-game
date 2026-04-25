@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Flow</title>
+    <script src="theme.js"></script>
+    <script src="circuit.js"></script>
+    <style>
+        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        #grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 5px; user-select: none; }
+        .cell { width: 60px; height: 60px; background: var(--panel); border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .dot { width: 30px; height: 30px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+        .line { position: absolute; width: 100%; height: 100%; opacity: 0.5; border-radius: 10px; }
+        h1 { color: var(--text); }
+    </style>
+</head>
+<body>
+    <h1>CONNECT</h1>
+    <div id="grid"></div>
+    <p style="color:var(--subtext)">Connect matching colors. Don't cross lines.</p>
+
+    <script>
+        checkSafetyLimit();
+        const size = 5;
+        const grid = document.getElementById('grid');
+        let isDrawing = false;
+        let startColor = null;
+        let solvedPaths = 0;
+
+        // Simple Level Layout (0=Empty, 1=Red, 2=Blue, 3=Green)
+        // This is a static level for demo. In full version, generate random maps.
+        const level = [
+            1, 0, 0, 0, 2,
+            0, 0, 3, 0, 0,
+            0, 1, 0, 0, 0,
+            0, 3, 0, 0, 0,
+            2, 0, 0, 0, 0
+        ];
+        
+        const colors = {1:'red', 2:'blue', 3:'lime'};
+        let cells = [];
+
+        function createGrid() {
+            grid.innerHTML = '';
+            level.forEach((val, i) => {
+                const div = document.createElement('div');
+                div.className = 'cell';
+                div.dataset.index = i;
+                
+                if(val !== 0) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dot.style.backgroundColor = colors[val];
+                    div.appendChild(dot);
+                    div.dataset.color = colors[val];
+                }
+                
+                div.addEventListener('mousedown', startDraw);
+                div.addEventListener('mouseenter', enterCell);
+                div.addEventListener('mouseup', endDraw);
+                
+                // Touch support
+                div.addEventListener('touchstart', (e) => startDraw(e));
+                // Touch move requires calculating element from coordinates, handled below
+                
+                grid.appendChild(div);
+                cells.push(div);
+            });
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            const target = e.target.closest('.cell');
+            if(target && target.dataset.color) {
+                startColor = target.dataset.color;
+            }
+        }
+
+        function enterCell(e) {
+            if(!isDrawing || !startColor) return;
+            const target = e.target.closest('.cell');
+            
+            // Simple visual feedback only for this demo code
+            // Full logic for non-crossing requires A* pathfinding validation
+            target.style.background = startColor;
+            target.style.opacity = "0.5";
+        }
+
+        function endDraw() {
+            isDrawing = false;
+            startColor = null;
+            checkWin();
+        }
+
+        function checkWin() {
+            // Placeholder logic: If mostly filled, win.
+            // In a real build, check connectivity.
+            const filled = cells.filter(c => c.style.background !== '').length;
+            if(filled > 10) {
+                setTimeout(() => nextLevel('win'), 500);
+            }
+        }
+
+        createGrid();
+    </script>
+</body>
+</html>

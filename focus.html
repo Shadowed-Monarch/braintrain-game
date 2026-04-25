@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Zone</title>
+    <script src="theme.js"></script>
+    <style>
+        body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: monospace; }
+        .visualizer { width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, #333, #000); box-shadow: 0 0 50px var(--accent); animation: pulse 4s infinite ease-in-out; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 0.5; } 100% { transform: scale(1); opacity: 0.8; } }
+        .controls { margin-top: 50px; display: flex; gap: 20px; }
+        button { padding: 15px 30px; font-size: 18px; border: 1px solid #555; background: #111; color: #fff; cursor: pointer; border-radius: 5px; }
+        button.active { background: var(--accent); border-color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="visualizer" id="vis"></div>
+    <h1>UNLIMITED FOCUS</h1>
+    <div class="controls">
+        <button onclick="playNoise('brown')">BROWN</button>
+        <button onclick="playNoise('white')">WHITE</button>
+        <button onclick="stopNoise()">STOP</button>
+    </div>
+
+    <script>
+        let audioCtx, noiseSource, gainNode;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function createBrownNoise() {
+            const bufferSize = audioCtx.sampleRate * 2; // 2 seconds buffer
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            let lastOut = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                data[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = data[i];
+                data[i] *= 3.5; // Compensate for gain
+            }
+            return buffer;
+        }
+
+        function createWhiteNoise() {
+            const bufferSize = audioCtx.sampleRate * 2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            return buffer;
+        }
+
+        function playNoise(type) {
+            initAudio();
+            if (noiseSource) stopNoise();
+
+            const buffer = type === 'brown' ? createBrownNoise() : createWhiteNoise();
+            noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+            noiseSource.loop = true;
+            
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.5; // Volume
+            
+            noiseSource.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            noiseSource.start();
+            
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`button[onclick="playNoise('${type}')"]`).classList.add('active');
+            
+            // Visualizer color change
+            document.getElementById('vis').style.setProperty('--accent', type === 'brown' ? '#964B00' : '#ffffff');
+        }
+
+        function stopNoise() {
+            if (noiseSource) {
+                noiseSource.stop();
+                noiseSource = null;
+            }
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        }
+    </script>
+</body>
+</html>

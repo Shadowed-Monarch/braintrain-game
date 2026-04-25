@@ -6,245 +6,111 @@
     <link rel="icon" type="image/jpeg" href="icon.png">
     <title>BrainTrain Game</title>
     <style>
-        @property --accent {
-            syntax: '<color>';
-            initial-value: #ff0000;
-            inherits: true;
-        }
+        @property --accent { syntax: '<color>'; initial-value: #ff0000; inherits: true; }
 
         :root[data-theme="dark"] {
-            --bg: #050505;
-            --card: #111;
-            --text: #ffffff;
-            --subtext: #666;
-            --border: #333;
-            --overlay: rgba(0,0,0,0.95);
+            --bg: #050505; --card: #111; --text: #ffffff;
+            --subtext: #666; --border: #333; --overlay: rgba(0,0,0,0.95);
             --shadow-color: var(--accent);
         }
 
         :root[data-theme="light"] {
-            --bg: #f5f5f5;
-            --card: #ffffff;
-            --text: #000000;
-            --subtext: #555;
-            --border: #ddd;
-            --overlay: rgba(255,255,255,0.95);
+            --bg: #f5f5f5; --card: #ffffff; --text: #000000;
+            --subtext: #555; --border: #ddd; --overlay: rgba(255,255,255,0.95);
             --shadow-color: transparent;
         }
 
         @keyframes rainbow-loop {
-            0% { --accent: #ff0000; }
-            20% { --accent: #ffcc00; }
-            40% { --accent: #00ff00; }
-            60% { --accent: #00ffff; }
-            80% { --accent: #9900ff; }
-            100% { --accent: #ff0000; }
+            0% { --accent: #ff0000; } 20% { --accent: #ffcc00; } 40% { --accent: #00ff00; }
+            60% { --accent: #00ffff; } 80% { --accent: #9900ff; } 100% { --accent: #ff0000; }
         }
 
-        .rainbow-active {
-            animation: rainbow-loop 5s infinite linear !important;
+        .rainbow-active { animation: rainbow-loop 5s infinite linear !important; }
+
+        /* VISUAL NOISE (KEEPING GRAIN, REMOVED SCANLINES) */
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999; opacity: 0.05;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            filter: contrast(170%) brightness(1000%);
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            background: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', sans-serif; margin: 0;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
         header {
-            width: 100%;
-            max-width: 1000px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
+            width: 100%; max-width: 1000px; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;
         }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            gap: 10px;
-        }
+        .logo-area { display: flex; align-items: center; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; gap: 10px; }
+        .site-logo { height: 40px; width: auto; }
 
-        .site-logo {
-            height: 40px;
-            width: auto;
-        }
-
-        .hero { 
-            text-align: center; 
-            margin: 20px 0 40px 0; 
-        }
-        
-        .hero h1 { 
-            font-size: 3rem; 
-            margin: 0; 
-            letter-spacing: 4px; 
-            font-weight: 900; 
-            text-shadow: 0 0 15px var(--shadow-color);
-        }
-        
-        .hero p { 
-            color: var(--subtext);
-            letter-spacing: 2px; 
-            margin-top: 5px; 
-            text-transform: uppercase; 
-            font-size: 0.9rem; 
-        }
-        
-        .dev-credit { 
-            font-size: 0.7rem; 
-            color: var(--subtext); 
-            margin-top: 10px; 
-            letter-spacing: 1px; 
-            text-transform: uppercase; 
-        }
+        .hero { text-align: center; margin: 20px 0 20px 0; }
+        .hero h1 { font-size: 3rem; margin: 0; letter-spacing: 4px; font-weight: 900; text-shadow: 0 0 15px var(--shadow-color); }
+        .hero p { color: var(--subtext); letter-spacing: 2px; margin-top: 5px; text-transform: uppercase; font-size: 0.9rem; }
+        .dev-credit { font-size: 0.7rem; color: var(--subtext); margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
 
         .brain-display {
-            background: rgba(255, 119, 255, 0.1);
-            padding: 8px 15px;
-            border-radius: 12px;
-            color: #ff77ff;
-            font-weight: bold;
-            border: 2px solid #ff77ff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
+            background: rgba(255, 119, 255, 0.1); padding: 8px 15px; border-radius: 12px;
+            color: #ff77ff; font-weight: bold; border: 2px solid #ff77ff;
+            display: flex; align-items: center; gap: 10px;
         }
 
         .rank-container {
-            width: 90%;
-            max-width: 500px;
-            background: var(--card);
-            padding: 20px;
-            border-radius: 20px;
-            margin: 20px 0;
-            border: 1px solid var(--border);
-            color: var(--text);
-            text-align: center;
+            width: 90%; max-width: 500px; background: var(--card);
+            padding: 20px; border-radius: 20px; margin: 20px 0;
+            border: 1px solid var(--border); text-align: center;
         }
+        .progress-bar { width: 100%; height: 10px; background: var(--border); border-radius: 5px; margin-top: 15px; overflow: hidden; }
+        #rank-progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px var(--shadow-color); }
 
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: var(--border);
-            border-radius: 5px;
-            margin-top: 15px;
-            overflow: hidden;
-        }
-
-        #rank-progress {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.5s ease;
-            box-shadow: 0 0 10px var(--shadow-color);
+        .section-label {
+            width: 90%; max-width: 800px; text-align: left; 
+            margin: 20px 0 10px 0; color: var(--subtext); 
+            font-size: 0.8rem; font-weight: bold; letter-spacing: 1px;
         }
 
         .game-grid {
             display: grid;
-            /* Changed grid columns to accommodate 4 games nicely */
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 20px;
-            width: 90%;
-            max-width: 800px;
+            gap: 20px; width: 90%; max-width: 800px; margin-bottom: 40px;
         }
 
         .game-card {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px solid var(--border);
-            text-decoration: none;
-            color: var(--text);
-            transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
+            background: var(--card); padding: 20px; border-radius: 15px;
+            text-align: center; border: 2px solid var(--border); text-decoration: none;
+            color: var(--text); transition: 0.3s; display: flex; flex-direction: column; align-items: center;
         }
+        .game-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 0 15px var(--shadow-color); }
+        .game-card img { width: 50px; height: 50px; margin-bottom: 10px; object-fit: contain; }
 
-        .game-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px);
-            background: var(--card);
-            box-shadow: 0 0 15px var(--shadow-color);
-        }
-
-        .game-card img {
-            width: 50px;
-            margin-bottom: 10px;
-        }
-
-        #shop-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--overlay);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .shop-item {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 3px solid transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-        }
-
-        .shop-item:hover { transform: scale(1.1); }
+        #shop-overlay { position: fixed; inset: 0; background: var(--overlay); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        .shop-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .shop-item { width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; display: flex; align-items: center; justify-content: center; }
         .shop-item.selected { border-color: var(--text); box-shadow: 0 0 15px var(--text); }
 
-        #dev-console {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--card);
-            padding: 20px;
-            display: none;
-            justify-content: center;
-            border-top: 2px solid var(--accent);
-            z-index: 2000;
-        }
+        .header-btn { background:none; border:1px solid var(--border); color:var(--text); cursor:pointer; padding:5px 12px; border-radius:15px; font-size: 1.1rem; transition: 0.2s; }
+        .header-btn:hover { border-color: var(--accent); }
     </style>
 </head>
 <body>
 
+    <div class="noise-overlay"></div>
+
     <header>
         <div class="logo-area">
             <img src="logo.png" alt="" class="site-logo">
-            Brain<span style="color:var(--accent)">Train</span> Game
+            Brain<span style="color:var(--accent)">Train</span>
         </div>
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <button onclick="toggleLightDark()" style="background:none; border:1px solid var(--border); color:var(--text); cursor:pointer; padding:5px 10px; border-radius:15px; font-size: 1.2rem;">🌓</button>
-            <div class="brain-display" id="brain-clicker">
-                <span>🧠</span>
-                <span id="brains">0</span>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button id="sound-btn" class="header-btn" onclick="toggleNoise()">🔇</button>
+            <button class="header-btn" onclick="toggleLightDark()">🌓</button>
+            <div class="brain-display">
+                <span>🧠</span> <span id="brains">0</span>
             </div>
         </div>
     </header>
@@ -264,14 +130,12 @@
         <div id="next-rank-info" style="color:var(--subtext); font-size:0.8rem; margin-top:10px;"></div>
     </div>
 
+    <div class="section-label">PRACTICE MODULES</div>
+
     <div class="game-grid">
         <a href="math.html" class="game-card">
             <img src="maths.png" alt="Math">
             <h3>MATH</h3>
-        </a>
-        <a href="grammar.html" class="game-card">
-            <img src="grammar.png" alt="Grammar">
-            <h3>GRAMMAR</h3>
         </a>
         <a href="dots.html" class="game-card">
             <img src="Dots.png" alt="Dots">
@@ -281,177 +145,150 @@
             <img src="memory.png" alt="Memory">
             <h3>MEMORY</h3>
         </a>
+        <a href="stroop.html" class="game-card">
+            <img src="Focus.png" alt="Focus">
+            <h3>FOCUS</h3>
+        </a>
+        <a href="aim.html" class="game-card">
+            <img src="Aim.png" alt="Aim">
+            <h3>AIM</h3>
+        </a>
+        <a href="avoid.html" class="game-card">
+            <img src="Reflex.png" alt="Reflex">
+            <h3>REFLEX</h3>
+        </a>
     </div>
 
-    <button onclick="toggleShop()" style="margin-top:40px; padding:12px 30px; font-weight:bold; background:var(--card); color:var(--text); border:2px solid var(--accent); border-radius:25px; cursor:pointer;">
+    <button onclick="toggleShop()" style="margin-top:10px; padding:12px 30px; font-weight:bold; background:var(--card); color:var(--text); border:2px solid var(--accent); border-radius:25px; cursor:pointer;">
         🎨 OPEN SKIN SHOP
     </button>
     
-    <a href="about.html" style="color:var(--subtext); text-decoration:none; font-size:0.8rem; margin:20px 0 40px 0;">ABOUT BRAIN TRAIN</a>
-
     <div id="shop-overlay">
         <h2 style="color:var(--text); margin-bottom:30px;">CHOOSE SKIN</h2>
         <div class="shop-grid" id="shop-grid"></div>
         <button onclick="toggleShop()" style="padding:10px 20px; cursor:pointer; background:var(--text); color:var(--bg); border:none; border-radius:5px;">CLOSE</button>
     </div>
 
-    <div id="dev-console">
-        <input type="text" id="dev-code" placeholder="ENTER CODE" style="padding:10px; width:200px; text-align:center; background:var(--bg); color:var(--text); border:1px solid var(--border);">
-    </div>
-
     <script>
+        // --- AUDIO ENGINE ---
+        let audioCtx, noiseNode, gainNode;
+        let isPlaying = false;
+
+        function toggleNoise() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const bufferSize = 2 * audioCtx.sampleRate;
+                const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                let lastOut = 0.0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    output[i] = (lastOut + (0.02 * white)) / 1.02; // Brown Noise
+                    lastOut = output[i];
+                    output[i] *= 3.5;
+                }
+                noiseNode = audioCtx.createBufferSource();
+                noiseNode.buffer = noiseBuffer;
+                noiseNode.loop = true;
+                gainNode = audioCtx.createGain();
+                gainNode.gain.value = 0; // Start muted
+                noiseNode.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                noiseNode.start();
+            }
+
+            isPlaying = !isPlaying;
+            document.getElementById('sound-btn').innerText = isPlaying ? "🔊" : "🔇";
+            gainNode.gain.setTargetAtTime(isPlaying ? 0.03 : 0, audioCtx.currentTime, 0.1);
+        }
+
         const colors = [
-            {id:'red', hex:'#ff0000', cost:0},
-            {id:'blue', hex:'#0088ff', cost:500},
-            {id:'yellow', hex:'#ffcc00', cost:1000},
-            {id:'green', hex:'#00ff00', cost:2000},
-            {id:'cyan', hex:'#00ffff', cost:3500},       
-            {id:'pink', hex:'#ff00ff', cost:5000},       
-            {id:'purple', hex:'#9900ff', cost:7500},
-            {id:'orange', hex:'#ff6600', cost:10000},  
-            {id:'gold', hex:'#ffd700', cost:25000},
-            {id:'rainbow', hex:'linear-gradient(45deg, #ff0000, #ffcc00, #00ff00, #0088ff, #9900ff)', cost:50000}
+            {id:'red', hex:'#ff0000', cost:0}, {id:'blue', hex:'#0088ff', cost:500},
+            {id:'yellow', hex:'#ffcc00', cost:1000}, {id:'green', hex:'#00ff00', cost:2000},
+            {id:'cyan', hex:'#00ffff', cost:3500}, {id:'pink', hex:'#ff00ff', cost:5000},
+            {id:'purple', hex:'#9900ff', cost:7500}, {id:'orange', hex:'#ff6600', cost:10000},
+            {id:'gold', hex:'#ffd700', cost:25000}, {id:'rainbow', hex:'linear-gradient(45deg, #f00, #ff0, #0f0, #0ff, #90f)', cost:50000}
         ];
 
         const ranks = [
-            { name: "Student", min: 0, icon: "🎓" },
-            { name: "Scholar", min: 500, icon: "📜" },
-            { name: "Genius", min: 2000, icon: "💡" },
-            { name: "Mastermind", min: 5000, icon: "👑" },
+            { name: "Student", min: 0, icon: "🎓" }, { name: "Scholar", min: 500, icon: "📜" },
+            { name: "Genius", min: 2000, icon: "💡" }, { name: "Mastermind", min: 5000, icon: "👑" },
             { name: "Overlord", min: 10000, icon: "🌌" }
         ];
 
-        let userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
-        let unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red'];
-        let currentSkin = localStorage.getItem('bt_current_skin') || 'red';
+        let userBrains, unlocked, currentSkin;
 
         function updateUI() {
             const savedMode = localStorage.getItem('bt_mode') || 'dark';
             document.documentElement.setAttribute('data-theme', savedMode);
             userBrains = parseInt(localStorage.getItem('bt_coins')) || 0;
+            unlocked = JSON.parse(localStorage.getItem('bt_skins')) || ['red'];
             currentSkin = localStorage.getItem('bt_current_skin') || 'red';
 
             document.getElementById('brains').innerText = userBrains;
 
-            let currentRank = ranks[0];
-            let nextRank = ranks[1] || ranks[0];
-            for (let i = 0; i < ranks.length; i++) {
-                if (userBrains >= ranks[i].min) {
-                    currentRank = ranks[i];
-                    nextRank = ranks[i + 1] || { name: "MAX", min: userBrains, icon: "🌌" };
-                }
-            }
+            let currentRank = ranks[0], nextRank = ranks[1] || ranks[0];
+            ranks.forEach(r => { if (userBrains >= r.min) currentRank = r; });
+            const nextIdx = ranks.indexOf(currentRank) + 1;
+            nextRank = ranks[nextIdx] || { name: "MAX", min: userBrains, icon: "🌌" };
 
             document.getElementById('rank-name').innerText = currentRank.name;
             document.getElementById('rank-icon').innerText = currentRank.icon;
             document.getElementById('next-rank-info').innerText = nextRank.name === "MAX" ? "MAX LEVEL" : `Next: ${nextRank.name} at ${nextRank.min}`;
-
-            let progress = ((userBrains - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
-            if(nextRank.name === "MAX") progress = 100;
+            
+            let progress = nextRank.name === "MAX" ? 100 : ((userBrains - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
             document.getElementById('rank-progress').style.width = Math.min(progress, 100) + "%";
 
-            const skinObj = colors.find(c => c.id === currentSkin) || colors[0];
-            
             if(currentSkin === 'rainbow') {
                 document.body.classList.add('rainbow-active');
             } else {
                 document.body.classList.remove('rainbow-active');
+                const skinObj = colors.find(c => c.id === currentSkin) || colors[0];
                 document.documentElement.style.setProperty('--accent', skinObj.hex);
             }
         }
 
         function toggleShop() {
             const overlay = document.getElementById('shop-overlay');
-            if(overlay.style.display === 'flex') {
-                overlay.style.display = 'none';
-            } else {
-                renderShop();
-                overlay.style.display = 'flex';
-            }
-        }
-
-        function toggleLightDark() {
-            const currentMode = localStorage.getItem('bt_mode') || 'dark';
-            const newMode = currentMode === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('bt_mode', newMode);
-            updateUI();
+            overlay.style.display = overlay.style.display === 'flex' ? 'none' : 'flex';
+            if(overlay.style.display === 'flex') renderShop();
         }
 
         function renderShop() {
             const grid = document.getElementById('shop-grid');
             grid.innerHTML = '';
-
             colors.forEach(c => {
                 const el = document.createElement('div');
                 el.className = 'shop-item';
                 el.style.background = c.hex;
-
                 if(unlocked.includes(c.id)) {
-                    if(currentSkin === c.id) {
-                        el.classList.add('selected');
-                    }
-                    el.onclick = () => {
-                        currentSkin = c.id;
-                        localStorage.setItem('bt_current_skin', c.id);
-                        updateUI();
-                        renderShop();
-                    };
+                    if(currentSkin === c.id) el.classList.add('selected');
+                    el.onclick = () => { localStorage.setItem('bt_current_skin', c.id); updateUI(); renderShop(); };
                 } else {
-                    el.innerHTML = `<span style="font-size:10px; font-weight:bold; color:${['yellow','cyan','gold','rainbow'].includes(c.id) ? 'black' : 'white'}">${c.cost}</span>`;
+                    el.innerHTML = `<span style="font-size:10px; font-weight:bold; color:black">${c.cost}</span>`;
                     el.style.opacity = "0.7";
-                    
                     el.onclick = () => {
                         if(userBrains >= c.cost) {
-                            userBrains -= c.cost;
-                            unlocked.push(c.id);
+                            userBrains -= c.cost; unlocked.push(c.id);
                             localStorage.setItem('bt_coins', userBrains);
                             localStorage.setItem('bt_skins', JSON.stringify(unlocked));
-                            
-                            currentSkin = c.id;
                             localStorage.setItem('bt_current_skin', c.id);
-                            
-                            updateUI();
-                            renderShop();
-                        } else {
-                            alert(`Need ${c.cost} Brains! You have ${userBrains}.`);
-                        }
+                            updateUI(); renderShop();
+                        } else alert("Not enough Brains!");
                     };
                 }
                 grid.appendChild(el);
             });
         }
 
-        let clicks = 0;
-        let timer;
-        document.getElementById('brain-clicker').onclick = () => {
-            clicks++;
-            clearTimeout(timer);
-            timer = setTimeout(() => clicks = 0, 1000);
-            if(clicks === 5) {
-                const dev = document.getElementById('dev-console');
-                dev.style.display = dev.style.display === 'flex' ? 'none' : 'flex';
-                clicks = 0;
-            }
-        };
-
-        document.getElementById('dev-code').onkeypress = (e) => {
-            if(e.key === 'Enter') {
-                const val = e.target.value.toUpperCase();
-                if(val === 'GODMODE') {
-                    localStorage.setItem('bt_coins', 99999);
-                    updateUI();
-                }
-                if(val === 'RESET') {
-                    localStorage.clear();
-                    location.reload();
-                }
-                document.getElementById('dev-console').style.display = 'none';
-            }
-        };
+        function toggleLightDark() {
+            const currentMode = localStorage.getItem('bt_mode') || 'dark';
+            localStorage.setItem('bt_mode', currentMode === 'dark' ? 'light' : 'dark');
+            updateUI();
+        }
 
         window.onload = updateUI;
-        window.onfocus = updateUI; 
-
+        window.onfocus = updateUI;
     </script>
 </body>
 </html>

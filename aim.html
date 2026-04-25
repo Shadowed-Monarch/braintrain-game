@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="Aim.png">
+    <title>Aim Train</title>
+    <script src="theme.js"></script>
+    <style>
+        @property --accent { syntax: '<color>'; initial-value: #f00; inherits: true; }
+        :root[data-theme="dark"] { --bg: #050505; --text: #fff; --border: #333; --overlay: rgba(0,0,0,0.9); }
+        :root[data-theme="light"] { --bg: #f5f5f5; --text: #000; --border: #ddd; --overlay: rgba(255,255,255,0.9); }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); box-sizing: border-box; }
+        #game-container { position: relative; width: 95%; max-width: 800px; height: 75vh; margin-top: 20px; border: 1px solid var(--border); border-radius: 15px; overflow: hidden; background: #000; cursor: crosshair; touch-action: none; }
+        .bubble { position: absolute; border-radius: 50%; border: 3px solid var(--accent); background: rgba(255,0,0,0.2); box-shadow: 0 0 15px var(--accent); animation-timing-function: linear; z-index: 50; }
+        @keyframes drift { from { top: -100px; } to { top: 100%; } }
+        .game-btn { padding: 15px 40px; font-size: 1.5rem; background: var(--bg); color: var(--text); border: 2px solid var(--accent); border-radius: 30px; cursor: pointer; margin-top: 30px; }
+        #btn-container { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--overlay); z-index: 100; text-align: center; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" style="text-decoration:none; color:var(--text); font-weight:bold;">← HOME</a>
+        <div>LEVEL <span id="lvl-display">1</span></div>
+        <div style="color:#ff77ff; font-weight:bold;">🧠 <span id="total-brains">0</span></div>
+    </header>
+    <div style="margin-top:10px; font-size:1.2rem;">Popped: <span id="count">0</span>/15 | Time: <span id="time">30</span>s</div>
+    <div id="game-container"><div id="btn-container"></div></div>
+    <button id="start-btn" class="game-btn" onclick="game.start()">START AIMING</button>
+
+    <script>
+        let selectedLvl = parseInt(localStorage.getItem('bt_unlocked_aim')) || 1;
+        class AimGame {
+            constructor() { this.isPlaying = false; this.updateUI(); }
+            updateUI() {
+                document.getElementById('total-brains').innerText = localStorage.getItem('bt_coins') || 0;
+                document.getElementById('lvl-display').innerText = selectedLvl;
+            }
+            start() {
+                document.getElementById('start-btn').style.display = 'none';
+                document.getElementById('btn-container').style.display = 'none';
+                this.solved = 0;
+                
+                // FIXED: Base time reduces slightly as levels go up (30s down to min 15s)
+                this.time = Math.max(15, 30 - Math.floor(selectedLvl / 2));
+                
+                this.isPlaying = true;
+                document.getElementById('count').innerText = "0";
+                document.getElementById('time').innerText = this.time;
+                this.spawn();
+                
+                this.timer = setInterval(() => {
+                    this.time--; 
+                    document.getElementById('time').innerText = this.time;
+                    if(this.time <= 0) this.end("lose");
+                }, 1000);
+            }
+            spawn() {
+                if(!this.isPlaying) return;
+                const container = document.getElementById('game-container');
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                
+                // Difficulty Scaling
+                let size = Math.max(30, 75 - (selectedLvl * 1.5));
+                b.style.width = size + 'px'; b.style.height = size + 'px';
+                b.style.left = Math.random() * (container.clientWidth - size) + "px";
+                
+                // FIXED: Speed uses an exponential decay curve so it doesn't get "impossible"
+                // Formula: 1.0s + (10.0s / (1 + level * 0.1))
+                let speedSeconds = 1.0 + (4.0 / (1 + (selectedLvl * 0.15)));
+                b.style.animation = `drift ${speedSeconds}s linear forwards`;
+                
+             const pop = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if(!this.isPlaying) return;
+    b.remove(); this.solved++;
+    
+    // REDUCED: Only 1s per hit now. No more "infinite time".
+    this.time += 1; 
+    
+    document.getElementById('count').innerText = this.solved;
+    document.getElementById('time').innerText = Math.floor(this.time);
+    
+    if(this.solved >= 15) this.end("win"); else this.spawn();
+};
+                b.onmousedown = pop; b.ontouchstart = pop;
+
+                container.appendChild(b);
+                b.addEventListener('animationend', () => { 
+                    if(this.isPlaying) { 
+                        b.remove(); 
+                        this.spawn(); 
+                    } 
+                });
+            }
+            end(res) {
+                this.isPlaying = false; clearInterval(this.timer);
+                const bc = document.getElementById('btn-container');
+                bc.style.display = 'flex';
+                bc.innerHTML = res === "win" ? `<h1>LEVEL CLEAR!</h1>` : `<h1>TIME OVER! 💀</h1>`;
+                if(res === "win") {
+                    let coins = parseInt(localStorage.getItem('bt_coins') || 0) + (selectedLvl * 5);
+                    localStorage.setItem('bt_coins', coins);
+                    if(selectedLvl === (parseInt(localStorage.getItem('bt_unlocked_aim')) || 1)) {
+                        localStorage.setItem('bt_unlocked_aim', selectedLvl + 1);
+                    }
+                    const n = document.createElement('button'); n.className="game-btn"; n.innerText="NEXT"; n.onclick=()=>location.reload(); bc.appendChild(n);
+                } else {
+                    const r = document.createElement('button'); r.className="game-btn"; r.innerText="RETRY"; r.onclick=()=>location.reload(); bc.appendChild(r);
+                }
+                this.updateUI();
+            }
+        }
+        const game = new AimGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="Reflex.png">
+    <title>Reflex Train</title>
+    <script src="theme.js"></script>
+    <style>
+        @property --accent { syntax: '<color>'; initial-value: #f00; inherits: true; }
+        :root[data-theme="dark"] { --bg: #050505; --text: #fff; --border: #333; --overlay: rgba(0,0,0,0.9); }
+        :root[data-theme="light"] { --bg: #f5f5f5; --text: #000; --border: #ddd; --overlay: rgba(255,255,255,0.9); }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); box-sizing: border-box; }
+        #game-container { position: relative; width: 95%; max-width: 800px; height: 75vh; margin-top: 20px; border: 1px solid var(--border); border-radius: 15px; overflow: hidden; background: #000; cursor: none; touch-action: none; }
+        #player { position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; box-shadow: 0 0 20px #fff, 0 0 40px var(--accent); pointer-events: none; z-index: 100; display: none; transform: translate(-50%, -50%); }
+        .bubble { position: absolute; width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ff4444; background: rgba(255,0,0,0.4); pointer-events: none; }
+        @keyframes drift { from { top: -60px; } to { top: 100%; } }
+        .game-btn { padding: 15px 40px; font-size: 1.5rem; background: var(--bg); color: var(--text); border: 2px solid var(--accent); border-radius: 30px; cursor: pointer; margin-top: 30px; }
+        #btn-container { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--overlay); z-index: 200; text-align: center; cursor: default; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" style="text-decoration:none; color:var(--text); font-weight:bold;">← HOME</a>
+        <div>LEVEL <span id="lvl-display">1</span></div>
+        <div style="color:#ff77ff; font-weight:bold;">🧠 <span id="total-brains">0</span></div>
+    </header>
+    <div style="margin-top:10px; font-size:1.2rem;">Survive: <span id="time">20</span>s</div>
+    <div id="game-container">
+        <div id="player"></div>
+        <div id="btn-container"></div>
+    </div>
+    <button id="start-btn" class="game-btn" onclick="game.start()">START EVASION</button>
+
+    <script>
+        let selectedLvl = parseInt(localStorage.getItem('bt_unlocked_reflex')) || 1;
+        class ReflexGame {
+            constructor() { 
+                this.isPlaying = false; 
+                this.px = 0; this.py = 0; 
+                this.updateUI(); 
+            }
+            updateUI() {
+                document.getElementById('total-brains').innerText = localStorage.getItem('bt_coins') || 0;
+                document.getElementById('lvl-display').innerText = selectedLvl;
+            }
+            start() {
+                document.getElementById('start-btn').style.display = 'none';
+                document.getElementById('btn-container').style.display = 'none';
+                const p = document.getElementById('player'); 
+                p.style.display = 'block';
+                
+                // Initial position center
+                const container = document.getElementById('game-container');
+                this.px = container.clientWidth / 2;
+                this.py = container.clientHeight / 2;
+                p.style.left = this.px + 'px'; p.style.top = this.py + 'px';
+
+                this.isPlaying = true; 
+                this.time = 20; 
+                
+                // Start Spawning
+                this.spawnLoop = setInterval(() => this.spawn(), Math.max(100, 300 - (selectedLvl * 15)));
+                
+                // Start Timer
+                this.timer = setInterval(() => {
+                    this.time--; 
+                    document.getElementById('time').innerText = this.time;
+                    if(this.time <= 0) this.end("win");
+                }, 1000);
+
+                // Start THE COLLISION LOOP (Checks every single frame)
+                this.runCollisionLoop();
+
+                const move = (e) => {
+                    if(!this.isPlaying) return;
+                    const r = container.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    this.px = clientX - r.left;
+                    this.py = clientY - r.top;
+                    p.style.left = this.px + 'px'; 
+                    p.style.top = this.py + 'px';
+                };
+                container.onmousemove = move; 
+                container.ontouchmove = move;
+            }
+            spawn() {
+                if(!this.isPlaying) return;
+                const c = document.getElementById('game-container');
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                b.style.left = Math.random() * (c.clientWidth - 40) + 'px';
+                b.style.animation = `drift ${Math.max(1, 3.5 - (selectedLvl * 0.15))}s linear forwards`;
+                c.appendChild(b);
+                b.addEventListener('animationend', () => b.remove());
+            }
+            runCollisionLoop() {
+                if(!this.isPlaying) return;
+                
+                const bubbles = document.querySelectorAll('.bubble');
+                bubbles.forEach(b => {
+                    // Get exact current position of falling bubble
+                    const bx = b.offsetLeft + 20;
+                    const by = b.offsetTop + 20;
+                    
+                    // Distance formula
+                    const dist = Math.hypot(this.px - bx, this.py - by);
+                    if(dist < 28) { // Hit detected
+                        this.end("lose");
+                    }
+                });
+
+                requestAnimationFrame(() => this.runCollisionLoop());
+            }
+            end(res) {
+                if(!this.isPlaying) return;
+                this.isPlaying = false; 
+                clearInterval(this.timer); 
+                clearInterval(this.spawnLoop);
+                
+                document.getElementById('player').style.display = 'none';
+                const bc = document.getElementById('btn-container');
+                bc.style.display = 'flex';
+                bc.innerHTML = res === "win" ? `<h1>SURVIVED!</h1>` : `<h1>WASTED! 💀</h1>`;
+                
+                if(res === "win") {
+                    let coins = parseInt(localStorage.getItem('bt_coins') || 0) + (selectedLvl * 5);
+                    localStorage.setItem('bt_coins', coins);
+                    if(selectedLvl === (parseInt(localStorage.getItem('bt_unlocked_reflex')) || 1)) {
+                        localStorage.setItem('bt_unlocked_reflex', selectedLvl + 1);
+                    }
+                    const n = document.createElement('button'); 
+                    n.className="game-btn"; n.innerText="NEXT"; 
+                    n.onclick=()=>location.reload(); 
+                    bc.appendChild(n);
+                } else {
+                    const r = document.createElement('button'); 
+                    r.className="game-btn"; r.innerText="RETRY"; 
+                    r.onclick=()=>location.reload(); 
+                    bc.appendChild(r);
+                }
+                this.updateUI();
+            }
+        }
+        const game = new ReflexGame();
+    </script>
+</body>
+</html>
